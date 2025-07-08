@@ -61,11 +61,13 @@
 	<logger name="com.ruoyi" level="info" />
 	<!-- Spring日志级别控制  -->
 	<logger name="org.springframework" level="warn" />
+    <!-- 启用 MyBatis SQL 日志 -->
+    <logger name="com.ruoyi.system.mapper" level="DEBUG"/>
 
 	<root level="info">
 		<appender-ref ref="console" />
 	</root>
-	
+
 	<!--系统操作日志-->
     <root level="info">
         <appender-ref ref="file_info" />
