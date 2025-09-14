@@ -1,11 +1,11 @@
-DROP DATABASE IF EXISTS `ry-config`;
+DROP DATABASE IF EXISTS `nacos251`;
 
-CREATE DATABASE  `ry-config` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE  `nacos251` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-USE `ry-config`;
+USE `nacos251`;
 
 /******************************************/
 /*   表名称 = config_info   */
