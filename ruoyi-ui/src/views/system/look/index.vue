@@ -142,6 +142,17 @@
           v-hasPermi="['system:look:add']"
         >生成数据</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-video-play"
+          size="mini"
+          :disabled="multiple"
+          @click="handleGenerateLooks"
+          v-hasPermi="['system:look:add']"
+        >生成look</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -296,7 +307,7 @@
 </template>
 
 <script>
-import { listLook, getLook, delLook, addLook, updateLook, generateLookData } from "@/api/system/look"
+import { listLook, getLook, delLook, addLook, updateLook, generateLookData, generateLooks } from "@/api/system/look"
 
 export default {
   name: "Look",
@@ -466,6 +477,16 @@ export default {
       }).then(response => {
         this.getList()
         this.$modal.msgSuccess(response.msg)
+      }).catch(() => {})
+    },
+    /** 生成look按钮操作 */
+    handleGenerateLooks() {
+      const lookIds = this.ids;
+      this.$modal.confirm('是否确认生成look？').then(() => {
+        return generateLooks(lookIds)
+      }).then(response => {
+        this.getList()
+        this.$modal.msgSuccess("生成成功")
       }).catch(() => {})
     }
   }

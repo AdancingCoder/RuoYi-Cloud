@@ -19,25 +19,30 @@ import com.ruoyi.system.domain.WeLook;
 import com.ruoyi.system.domain.WeCloth;
 import com.ruoyi.system.domain.WeModel;
 import com.ruoyi.system.domain.WeBack;
-import com.ruoyi.system.service.IWeLookService;
 import com.ruoyi.system.service.IWeClothService;
 import com.ruoyi.system.service.IWeModelService;
 import com.ruoyi.system.service.IWeBackService;
+import com.ruoyi.system.service.IWeLookService;
+import com.ruoyi.common.core.utils.WeshopUtils;
+import java.util.ArrayList;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 外观Controller
- *
+ * 
  * @author ruoyi
- * @date 2025-09-14
  */
 @RestController
 @RequestMapping("/look")
 public class WeLookController extends BaseController
 {
+    private static final Logger log = LoggerFactory.getLogger(WeLookController.class);
+    
     @Autowired
     private IWeLookService weLookService;
 
@@ -143,7 +148,7 @@ public class WeLookController extends BaseController
                     checkLook.setClothId(cloth.getId());
                     checkLook.setModelId(model.getId());
                     checkLook.setBackId(back.getId());
-
+                    
                     // 如果不存在相同组合，则创建新的外观数据
                     if (weLookService.selectWeLookList(checkLook).isEmpty()) {
                         WeLook look = new WeLook();
@@ -151,10 +156,8 @@ public class WeLookController extends BaseController
                         look.setClothUrl(cloth.getClothUrl());
                         look.setModelId(model.getId());
                         look.setModelWeId(model.getModelWeId());
-                        look.setModelUrl(model.getModelUrl());
                         look.setBackId(back.getId());
                         look.setBackWeId(back.getBackWeId());
-                        look.setBackUrl(back.getBackUrl());
                         // 设置默认名称为"服装+模特+背景"组合
                         look.setName(cloth.getName() + "+" + model.getName() + "+" + back.getName());
                         // 设置外观类型与服装类型一致
@@ -166,5 +169,97 @@ public class WeLookController extends BaseController
             }
         }
         return AjaxResult.success("生成成功，共新增" + count + "条数据");
+    }
+    
+    /**
+     * 生成looks
+     */
+    @RequiresPermissions("system:look:add")
+    @Log(title = "外观", businessType = BusinessType.UPDATE)
+    @PostMapping("/generateLooks")
+    public AjaxResult generateLooks(@RequestBody Long[] ids)
+    {
+        List<WeLook> looks = new ArrayList<>();
+        for (Long id : ids) {
+            looks.add(weLookService.selectWeLookById(id));
+        }
+        
+        // 异步处理任务
+        //new Thread(() -> {
+            for (WeLook look : looks) {
+                try {
+                    log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
+                    
+                    // 1. 创建任务
+                    String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
+                    if (taskId != null) {
+                        log.info("创建任务成功，taskId: {}", taskId);
+                        // 更新任务ID
+                        look.setTaskId(taskId);
+                        weLookService.updateWeLook(look);
+                        
+                        // 2. 执行任务
+                        String executionId = WeshopUtils.executeTask(taskId, look.getModelWeId(), look.getBackWeId());
+                        if (executionId != null) {
+                            log.info("执行任务成功，executionId: {}", executionId);
+                            // 更新执行ID
+                            look.setExecuteId(executionId);
+                            weLookService.updateWeLook(look);
+                            
+                            // 3. 轮询任务状态直到完成
+                            String status = "Pending";
+                            int retryCount = 0;
+                            int maxRetries = 30; // 最多尝试30次，即150秒(2.5分钟)
+                            
+                            while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
+                                Thread.sleep(5000); // 每5秒查询一次
+                                retryCount++;
+                                log.info("第{}次轮询任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
+                                
+                                WeshopUtils.TaskResult result = WeshopUtils.queryTask(taskId, executionId);
+                                if (result != null) {
+                                    status = result.getStatus();
+                                    log.info("任务状态: {}", status);
+                                    
+                                    // 如果任务成功完成，更新look_url
+                                    if ("Success".equals(status)) {
+                                        look.setLookUrl(result.getImageUrl());
+                                        weLookService.updateWeLook(look);
+                                        log.info("任务成功完成，图片URL: {}", result.getImageUrl());
+                                    } else if ("Failed".equals(status)) {
+                                        look.setLookUrl("失败");
+                                        weLookService.updateWeLook(look);
+                                        log.info("任务执行失败");
+                                    }
+                                } else {
+                                    log.warn("查询任务返回空结果");
+                                }
+                            }
+                            
+                            if (retryCount >= maxRetries) {
+                                log.error("任务超时，未在规定时间内完成，taskId: {}", taskId);
+                                look.setLookUrl("超时");
+                                weLookService.updateWeLook(look);
+                            }
+                        } else {
+                            log.error("执行任务失败，taskId: {}", taskId);
+                        }
+                    } else {
+                        log.error("创建任务失败，look ID: {}", look.getId());
+                    }
+                } catch (Exception e) {
+                    log.error("处理look ID {} 时出错", look.getId(), e);
+                    try {
+                        look.setLookUrl("异常");
+                        weLookService.updateWeLook(look);
+                    } catch (Exception updateException) {
+                        log.error("更新look异常状态失败，look ID: {}", look.getId(), updateException);
+                    }
+                }
+            }
+            log.info("批量生成looks处理完成");
+        //}).start();
+        
+        return AjaxResult.success("任务已提交，正在后台处理");
     }
 }

@@ -50,3 +50,12 @@ export function generateLookData() {
     method: 'post'
   })
 }
+
+// 生成look
+export function generateLooks(data) {
+  return request({
+    url: '/system/look/generateLooks',
+    method: 'post',
+    data: data
+  })
+}
