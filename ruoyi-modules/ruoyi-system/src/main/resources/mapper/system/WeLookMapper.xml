@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.WeLookMapper">
+
+    <resultMap type="WeLook" id="WeLookResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="lookUrl"    column="look_url"    />
+        <result property="taskId"    column="task_id"    />
+        <result property="executeId"    column="execute_id"    />
+        <result property="type"    column="type"    />
+        <result property="modelId"    column="model_id"    />
+        <result property="modelWeId"    column="model_we_id"    />
+        <result property="modelUrl"    column="model_url"    />
+        <result property="backId"    column="back_id"    />
+        <result property="backWeId"    column="back_we_id"    />
+        <result property="backUrl"    column="back_url"    />
+        <result property="clothId"    column="cloth_id"    />
+        <result property="clothUrl"    column="cloth_url"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectWeLookVo">
+        select id, name, look_url, task_id, execute_id, type, model_id, model_we_id, model_url, back_id, back_we_id, back_url, cloth_id, cloth_url, del_flag, create_by, create_time, update_by, update_time, remark from we_look
+    </sql>
+
+    <select id="selectWeLookList" parameterType="WeLook" resultMap="WeLookResult">
+        <include refid="selectWeLookVo"/>
+        <where>
+            <if test="id != null "> and id = #{id}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="lookUrl != null  and lookUrl != ''"> and look_url = #{lookUrl}</if>
+            <if test="taskId != null  and taskId != ''"> and task_id = #{taskId}</if>
+            <if test="executeId != null  and executeId != ''"> and execute_id = #{executeId}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="modelId != null "> and model_id = #{modelId}</if>
+            <if test="modelWeId != null  and modelWeId != ''"> and model_we_id = #{modelWeId}</if>
+            <if test="modelUrl != null  and modelUrl != ''"> and model_url = #{modelUrl}</if>
+            <if test="backId != null "> and back_id = #{backId}</if>
+            <if test="backWeId != null  and backWeId != ''"> and back_we_id = #{backWeId}</if>
+            <if test="backUrl != null  and backUrl != ''"> and back_url = #{backUrl}</if>
+            <if test="clothId != null "> and cloth_id = #{clothId}</if>
+            <if test="clothUrl != null  and clothUrl != ''"> and cloth_url = #{clothUrl}</if>
+        </where>
+    </select>
+
+    <select id="selectWeLookById" parameterType="Long" resultMap="WeLookResult">
+        <include refid="selectWeLookVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWeLook" parameterType="WeLook" useGeneratedKeys="true" keyProperty="id">
+        insert into we_look
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="lookUrl != null">look_url,</if>
+            <if test="taskId != null">task_id,</if>
+            <if test="executeId != null">execute_id,</if>
+            <if test="type != null">type,</if>
+            <if test="modelId != null">model_id,</if>
+            <if test="modelWeId != null">model_we_id,</if>
+            <if test="modelUrl != null">model_url,</if>
+            <if test="backId != null">back_id,</if>
+            <if test="backWeId != null">back_we_id,</if>
+            <if test="backUrl != null">back_url,</if>
+            <if test="clothId != null">cloth_id,</if>
+            <if test="clothUrl != null">cloth_url,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="lookUrl != null">#{lookUrl},</if>
+            <if test="taskId != null">#{taskId},</if>
+            <if test="executeId != null">#{executeId},</if>
+            <if test="type != null">#{type},</if>
+            <if test="modelId != null">#{modelId},</if>
+            <if test="modelWeId != null">#{modelWeId},</if>
+            <if test="modelUrl != null">#{modelUrl},</if>
+            <if test="backId != null">#{backId},</if>
+            <if test="backWeId != null">#{backWeId},</if>
+            <if test="backUrl != null">#{backUrl},</if>
+            <if test="clothId != null">#{clothId},</if>
+            <if test="clothUrl != null">#{clothUrl},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateWeLook" parameterType="WeLook">
+        update we_look
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="lookUrl != null">look_url = #{lookUrl},</if>
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="executeId != null">execute_id = #{executeId},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="modelId != null">model_id = #{modelId},</if>
+            <if test="modelWeId != null">model_we_id = #{modelWeId},</if>
+            <if test="modelUrl != null">model_url = #{modelUrl},</if>
+            <if test="backId != null">back_id = #{backId},</if>
+            <if test="backWeId != null">back_we_id = #{backWeId},</if>
+            <if test="backUrl != null">back_url = #{backUrl},</if>
+            <if test="clothId != null">cloth_id = #{clothId},</if>
+            <if test="clothUrl != null">cloth_url = #{clothUrl},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWeLookById" parameterType="Long">
+        delete from we_look where id = #{id}
+    </delete>
+
+    <delete id="deleteWeLookByIds" parameterType="String">
+        delete from we_look where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
