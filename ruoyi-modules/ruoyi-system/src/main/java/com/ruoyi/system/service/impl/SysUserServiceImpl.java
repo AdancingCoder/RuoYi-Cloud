@@ -326,7 +326,7 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public int updateUserStatus(SysUser user)
     {
-        return userMapper.updateUser(user);
+        return userMapper.updateUserStatus(user.getUserId(), user.getStatus());
     }
 
     /**
@@ -355,6 +355,17 @@ public class SysUserServiceImpl implements ISysUserService
     }
 
     /**
+     * 更新用户登录信息（IP和登录时间）
+     * 
+     * @param user 用户信息
+     * @return 结果
+     */
+    public boolean updateLoginInfo(SysUser user)
+    {
+        return userMapper.updateLoginInfo(user) > 0;
+    }
+
+    /**
      * 重置用户密码
      * 
      * @param user 用户信息
@@ -363,7 +374,7 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public int resetPwd(SysUser user)
     {
-        return userMapper.updateUser(user);
+        return userMapper.resetUserPwd(user.getUserId(), user.getPassword());
     }
 
     /**
@@ -517,6 +528,7 @@ public class SysUserServiceImpl implements ISysUserService
                     checkUserDataScope(u.getUserId());
                     deptService.checkDeptDataScope(user.getDeptId());
                     user.setUserId(u.getUserId());
+                    user.setDeptId(u.getDeptId());
                     user.setUpdateBy(operName);
                     userMapper.updateUser(user);
                     successNum++;
