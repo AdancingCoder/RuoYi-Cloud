@@ -59,3 +59,12 @@ export function generateLooks(data) {
     data: data
   })
 }
+
+// 生成AI图
+export function generateAiImage(data) {
+  return request({
+    url: '/system/look/generateAiImage',
+    method: 'post',
+    data: data
+  })
+}

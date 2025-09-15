@@ -1,21 +1,11 @@
-/*
- Navicat Premium Data Transfer
+DROP DATABASE IF EXISTS `ry-cloud`;
 
- Source Server         : localhost
- Source Server Type    : MySQL
- Source Server Version : 80030 (8.0.30)
- Source Host           : localhost:3306
- Source Schema         : ry-cloud
-
- Target Server Type    : MySQL
- Target Server Version : 80030 (8.0.30)
- File Encoding         : 65001
-
- Date: 15/09/2025 09:57:28
-*/
+CREATE DATABASE  `ry-cloud` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+USE `ry-cloud`;
 
 -- ----------------------------
 -- Table structure for gen_table

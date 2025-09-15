@@ -153,6 +153,17 @@
           v-hasPermi="['system:look:add']"
         >生成look</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-picture"
+          size="mini"
+          :disabled="multiple"
+          @click="handleGenerateAiImage"
+
+        >生成AI图</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -307,7 +318,7 @@
 </template>
 
 <script>
-import { listLook, getLook, delLook, addLook, updateLook, generateLookData, generateLooks } from "@/api/system/look"
+import { listLook, getLook, delLook, addLook, updateLook, generateLookData, generateLooks, generateAiImage } from "@/api/system/look"
 
 export default {
   name: "Look",
@@ -487,6 +498,17 @@ export default {
       }).then(response => {
         this.getList()
         this.$modal.msgSuccess("生成成功")
+      }).catch(() => {})
+    },
+
+    /** 生成AI图按钮操作 */
+    handleGenerateAiImage() {
+      const lookIds = this.ids;
+      this.$modal.confirm('是否确认为选中的LOOK生成AI图?').then(() => {
+        return generateAiImage(lookIds)
+      }).then(response => {
+        this.getList()
+        this.$modal.msgSuccess("生成AI图任务已提交")
       }).catch(() => {})
     }
   }
