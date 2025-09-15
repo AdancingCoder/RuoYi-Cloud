@@ -161,8 +161,10 @@ public class WeLookController extends BaseController
                         look.setClothUrl(cloth.getClothUrl());
                         look.setModelId(model.getId());
                         look.setModelWeId(model.getModelWeId());
+                        look.setModelUrl(model.getModelUrl());
                         look.setBackId(back.getId());
                         look.setBackWeId(back.getBackWeId());
+                        look.setBackUrl(back.getBackUrl());
                         // 设置默认名称为"服装+模特+背景"组合
                         look.setName(cloth.getName() + "+" + model.getName() + "+" + back.getName());
                         // 设置外观类型与服装类型一致
@@ -190,13 +192,14 @@ public class WeLookController extends BaseController
         }
 
         // 异步处理任务
-        new Thread(() -> {
+        //new Thread(() -> {
             for (WeLook look : looks) {
                 try {
                     log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
 
                     // 1. 创建任务
-                    String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
+                    //String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
+                    String taskId ="68c8004a7af440cb455c057f";
                     if (taskId != null) {
                         log.info("创建任务成功，taskId: {}", taskId);
                         // 更新任务ID
@@ -263,7 +266,7 @@ public class WeLookController extends BaseController
                 }
             }
             log.info("批量生成looks处理完成");
-        }).start();
+        //}).start();
 
         return AjaxResult.success("任务已提交，正在后台处理");
     }

@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * AI图片对象 we_ai_picture
- * 
+ *
  * @author ruoyi
  * @date 2025-09-14
  */
@@ -16,6 +16,7 @@ public class WeAiPicture extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 主键 */
+    @Excel(name = "id")
     private Long id;
 
     /** 图片名称 */
@@ -27,142 +28,142 @@ public class WeAiPicture extends BaseEntity
     private String aiUrl;
 
     /** 任务ID */
-    @Excel(name = "任务ID")
+    //@Excel(name = "任务ID")
     private String taskId;
 
     /** 执行ID */
-    @Excel(name = "执行ID")
+    //@Excel(name = "执行ID")
     private String executeId;
 
     /** 图片类型 */
-    @Excel(name = "图片类型")
+    //@Excel(name = "图片类型")
     private String type;
 
     /** 关联we_look表的主键 */
-    @Excel(name = "关联we_look表的主键")
+    //@Excel(name = "关联we_look表的主键")
     private Long lookId;
 
     /** 外观图片URL */
-    @Excel(name = "外观图片URL")
+    //@Excel(name = "外观图片URL")
     private String lookUrl;
 
     /** 父id */
-    @Excel(name = "父id")
+    //@Excel(name = "父id")
     private Long pid;
 
     /** 状态（0,1,2） */
-    @Excel(name = "状态", readConverterExp = "0=,1,2")
+    @Excel(name = "状态", readConverterExp = "0=待审核,1=审核通过，2=审核未通过")
     private String dataStatus;
 
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
 
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }
 
-    public Long getId() 
+    public Long getId()
     {
         return id;
     }
 
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
 
-    public String getName() 
+    public String getName()
     {
         return name;
     }
 
-    public void setAiUrl(String aiUrl) 
+    public void setAiUrl(String aiUrl)
     {
         this.aiUrl = aiUrl;
     }
 
-    public String getAiUrl() 
+    public String getAiUrl()
     {
         return aiUrl;
     }
 
-    public void setTaskId(String taskId) 
+    public void setTaskId(String taskId)
     {
         this.taskId = taskId;
     }
 
-    public String getTaskId() 
+    public String getTaskId()
     {
         return taskId;
     }
 
-    public void setExecuteId(String executeId) 
+    public void setExecuteId(String executeId)
     {
         this.executeId = executeId;
     }
 
-    public String getExecuteId() 
+    public String getExecuteId()
     {
         return executeId;
     }
 
-    public void setType(String type) 
+    public void setType(String type)
     {
         this.type = type;
     }
 
-    public String getType() 
+    public String getType()
     {
         return type;
     }
 
-    public void setLookId(Long lookId) 
+    public void setLookId(Long lookId)
     {
         this.lookId = lookId;
     }
 
-    public Long getLookId() 
+    public Long getLookId()
     {
         return lookId;
     }
 
-    public void setLookUrl(String lookUrl) 
+    public void setLookUrl(String lookUrl)
     {
         this.lookUrl = lookUrl;
     }
 
-    public String getLookUrl() 
+    public String getLookUrl()
     {
         return lookUrl;
     }
 
-    public void setPid(Long pid) 
+    public void setPid(Long pid)
     {
         this.pid = pid;
     }
 
-    public Long getPid() 
+    public Long getPid()
     {
         return pid;
     }
 
-    public void setDataStatus(String dataStatus) 
+    public void setDataStatus(String dataStatus)
     {
         this.dataStatus = dataStatus;
     }
 
-    public String getDataStatus() 
+    public String getDataStatus()
     {
         return dataStatus;
     }
 
-    public void setDelFlag(String delFlag) 
+    public void setDelFlag(String delFlag)
     {
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
     }

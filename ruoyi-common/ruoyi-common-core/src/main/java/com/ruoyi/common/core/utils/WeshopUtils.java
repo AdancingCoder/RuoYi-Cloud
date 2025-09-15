@@ -20,7 +20,7 @@ public class WeshopUtils {
     private static final String BASE_URL = "https://openapi.weshop.com/openapi/v1/agent";
 
     // 模拟Cookie，实际使用中应该从配置文件或安全存储中获取
-    private static String COOKIE = "_ga=GA1.1.1220826162.1757506666; weshopaitoken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjI2OTA2ODgsInBob25lTnVtYmVyIjoiMTg0MDE1Mzg4NzYiLCJwbGF0Zm9ybSI6IndlYiIsInN1YiI6IjY4YWQ2ZjRhN2M5YWZiMGFhMGI4MDkwNyJ9.bnNW2-ycKq5ey3MP8T0l5OrqIwXiTEkV5k79IgqfbcA; _ga_VV0L43VV4W=GS2.1.s1757844501$o7$g1$t1757844505$j56$l0$h0";
+    private static String COOKIE = "fAv6SdWMDS5XCp3bmbmYhu8pwBXennGZ";
 
     /**
      * 获取Cookie（预留扩展接口，后续应实现动态获取）
@@ -326,7 +326,7 @@ public class WeshopUtils {
         String jsonData = JSON.toJSONString(data);
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        headers.put("Cookie", getCookie());
+        headers.put("Authorization", getCookie());
 
         return HttpUtils.sendPost(url, jsonData, headers);
     }

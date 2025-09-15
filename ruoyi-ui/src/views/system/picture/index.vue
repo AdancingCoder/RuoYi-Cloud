@@ -125,7 +125,6 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="图片名称" align="center" prop="name" />
-      <el-table-column label="AI生成图片URL" align="center" prop="aiUrl" />
       <el-table-column label="AI生成图片URL" align="center" prop="aiUrl">
         <template slot-scope="scope">
           <el-image
