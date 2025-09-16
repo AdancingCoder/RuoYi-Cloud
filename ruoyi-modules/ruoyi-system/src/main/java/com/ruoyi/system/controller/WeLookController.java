@@ -192,14 +192,14 @@ public class WeLookController extends BaseController
         }
 
         // 异步处理任务
-        new Thread(() -> {
+        //new Thread(() -> {
             for (WeLook look : looks) {
                 try {
                     log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
 
                     // 1. 创建任务
-                    //String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
-                    String taskId ="68c8004a7af440cb455c057f";
+                    String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
+                    //String taskId ="68c8004a7af440cb455c057f";
                     if (taskId != null) {
                         log.info("创建任务成功，taskId: {}", taskId);
                         // 更新任务ID
@@ -266,7 +266,7 @@ public class WeLookController extends BaseController
                 }
             }
             log.info("批量生成looks处理完成");
-        }).start();
+        //}).start();
 
         return AjaxResult.success("任务已提交，正在后台处理");
     }
