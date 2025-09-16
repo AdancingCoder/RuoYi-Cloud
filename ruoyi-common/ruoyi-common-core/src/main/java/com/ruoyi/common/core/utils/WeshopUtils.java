@@ -317,6 +317,32 @@ public class WeshopUtils {
     }
 
     /**
+     * 根据look类型生成对应的prompt
+     *
+     * @param type look类型
+     * @param basePrompt 基础prompt
+     * @return 完整的prompt
+     */
+    public static String generatePromptByType(String type, String basePrompt) {
+        String prompt1 = "使用上面这张图片，根据文字描述，生成1张高分辨率图片，不要改变背景，如果背景中有不明线条需要去掉，不要袜套,不要包,不要帽子,如果有手套需要和衣服颜色匹配，鞋子为以白色为主色，浅灰色为辅色，拼接设计的高帮户外鞋，鞋子正常踩在地上,不要悬空，鞋子要完整，不要脚印，衣服有领儿的，不要改变领儿，衣服袖口不要改变，不要改变上衣尺寸，如果是裙子，替换一条和衣服匹配且颜色可以不一样的浅色裤子,人物面带笑容，人物的手更像欧洲人的手，人物姿势更有型。将图片中人物的体型缩小，使其在画面中的占比更小，视觉上符合身高不超过180cm 的比例，同时保持人物与背景的相对位置和整体画面的协调性，就像把人物按比例缩小，让其看起来更小巧精致，与周围环境更适配。人体、衣服、环境更加和谐，尤其是人体、衣服、环境中的光线和阴影要契合。专业摄影，整体拍摄风格呈现高清细节质感，类似时尚杂志封面设计。";
+
+        String prompt2 = "使用上面这张图片，根据文字描述，生成1张高分辨率图片，不要改变背景，不要改变衣服长短宽窄，因衣服无口袋，人物手部不要做插兜动作，人物姿势更灵动，人物的手更像亚洲人的手。将图片中人物的体型缩小，使其在画面中的占比更小，视觉上符合身高不超过180cm 的比例，同时保持人物与背景的相对位置和整体画面的协调性，就像把人物按比例缩小，让其看起来更小巧精致，与周围环境更适配。人体、衣服、环境更加和谐，尤其是人体、衣服、环境中的光线和阴影要契合。专业摄影，整体拍摄风格呈现高清细节质感，类似时尚杂志封面设计。";
+
+        if (type == null) {
+            return basePrompt != null ? basePrompt : "";
+        }
+
+        switch (type) {
+            case "1":
+                return (basePrompt != null ? basePrompt : "") + prompt1;
+            case "2":
+                return (basePrompt != null ? basePrompt : "") + prompt2;
+            default:
+                return basePrompt != null ? basePrompt : "";
+        }
+    }
+
+    /**
      * 发送POST请求
      *
      * @param url 请求URL

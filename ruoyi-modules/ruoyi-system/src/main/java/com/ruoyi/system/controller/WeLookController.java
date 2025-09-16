@@ -304,7 +304,7 @@ public class WeLookController extends BaseController
 
                         // 2. 执行AI图片任务
                         //定义prompt,值为 back.getPromot() + look.getType()对应的提示词
-                        String executionId = WeshopUtils.executeAiImageTask(taskId, back.getPromot());
+                        String executionId = WeshopUtils.executeAiImageTask(taskId, WeshopUtils.generatePromptByType(look.getType(), back.getPromot()));
                         if (executionId != null) {
                             log.info("执行AI图片任务成功，executionId: {}", executionId);
 

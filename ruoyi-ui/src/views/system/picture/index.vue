@@ -76,7 +76,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+<!--      <el-col :span="1.5">
         <el-button
           type="primary"
           plain
@@ -85,7 +85,7 @@
           @click="handleAdd"
           v-hasPermi="['system:picture:add']"
         >新增</el-button>
-      </el-col>
+      </el-col>-->
       <el-col :span="1.5">
         <el-button
           type="success"
@@ -144,7 +144,6 @@
         </template>
       </el-table-column>
       <el-table-column label="关联we_look表的主键" align="center" prop="lookId" />
-      <el-table-column label="look图片URL" align="center" prop="lookUrl" />
       <el-table-column label="look图片URL" align="center" prop="lookUrl">
         <template slot-scope="scope">
           <el-image

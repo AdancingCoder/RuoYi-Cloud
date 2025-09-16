@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.core.annotation.Excel;
 import com.ruoyi.common.core.web.domain.BaseEntity;
+import com.ruoyi.system.utils.AiPictureExcelHandler;
 
 /**
  * AI图片对象 we_ai_picture
@@ -24,7 +25,7 @@ public class WeAiPicture extends BaseEntity
     private String name;
 
     /** AI生成图片URL */
-    @Excel(name = "AI生成图片URL")
+    @Excel(name = "AI生成图片URL", cellType = Excel.ColumnType.STRING, handler = AiPictureExcelHandler.class)
     private String aiUrl;
 
     /** 任务ID */
@@ -52,7 +53,7 @@ public class WeAiPicture extends BaseEntity
     private Long pid;
 
     /** 状态（0,1,2） */
-    @Excel(name = "状态", readConverterExp = "0=待审核,1=审核通过，2=审核未通过")
+    @Excel(name = "状态", readConverterExp = "0=待审核,1=审核通过，2=审核未通过", combo = {"待审核", "审核通过", "审核未通过"})
     private String dataStatus;
 
     /** 删除标志（0代表存在 2代表删除） */
