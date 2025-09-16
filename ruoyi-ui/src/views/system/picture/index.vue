@@ -118,6 +118,16 @@
           v-hasPermi="['system:picture:export']"
         >导出</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-upload"
+          size="mini"
+          @click="handleUpdateAudit"
+          v-hasPermi="['system:picture:edit']"
+        >更新审核信息</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -218,7 +228,7 @@
         <el-form-item label="关联we_look表的主键" prop="lookId">
           <el-input v-model="form.lookId" placeholder="请输入关联we_look表的主键" />
         </el-form-item>
-        <el-form-item label="外观图片URL" prop="lookUrl">
+        <el-form-item label="look图片URL" prop="lookUrl">
           <el-input v-model="form.lookUrl" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="父id" prop="pid">
@@ -243,11 +253,39 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 更新审核信息对话框 -->
+    <el-dialog :title="auditTitle" :visible.sync="auditOpen" width="500px" append-to-body>
+      <el-form ref="auditForm" :model="auditForm" label-width="80px">
+        <el-form-item label="Excel文件" prop="file">
+          <el-upload
+            ref="upload"
+            :limit="1"
+            accept=".xlsx, .xls"
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :on-remove="handleFileRemove"
+            drag
+          >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">
+              请上传包含审核状态的Excel文件，格式要求：包含id、图片名称、AI生成图片URL、状态等列
+            </div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAuditForm" :loading="auditLoading">确 定</el-button>
+        <el-button @click="cancelAudit">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listPicture, getPicture, delPicture, addPicture, updatePicture } from "@/api/system/picture"
+import { listPicture, getPicture, delPicture, addPicture, updatePicture, updateAuditStatus } from "@/api/system/picture";
+import { getToken } from "@/utils/auth";
 
 export default {
   name: "Picture",
@@ -272,18 +310,26 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否显示审核弹出层
+      auditOpen: false,
+      // 审核弹出层标题
+      auditTitle: "更新审核信息",
+      // 审核表单参数
+      auditForm: {},
+      // 审核提交加载状态
+      auditLoading: false,
+      // 上传文件对象
+      uploadFile: null,
       // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         id: null,
         name: null,
-        aiUrl: null,
         taskId: null,
         executeId: null,
         type: null,
         lookId: null,
-        lookUrl: null,
         pid: null,
         dataStatus: null,
       },
@@ -291,26 +337,40 @@ export default {
       form: {},
       // 表单校验
       rules: {
+        name: [
+          { required: true, message: "图片名称不能为空", trigger: "blur" }
+        ],
+        aiUrl: [
+          { required: true, message: "AI生成图片URL不能为空", trigger: "blur" }
+        ],
+        dataStatus: [
+          { required: true, message: "状态不能为空", trigger: "change" }
+        ]
       }
-    }
+    };
   },
   created() {
-    this.getList()
+    this.getList();
   },
   methods: {
     /** 查询AI图片列表 */
     getList() {
-      this.loading = true
+      this.loading = true;
       listPicture(this.queryParams).then(response => {
-        this.pictureList = response.rows
-        this.total = response.total
-        this.loading = false
-      })
+        this.pictureList = response.rows;
+        this.total = response.total;
+        this.loading = false;
+      });
     },
     // 取消按钮
     cancel() {
-      this.open = false
-      this.reset()
+      this.open = false;
+      this.reset();
+    },
+    // 取消审核按钮
+    cancelAudit() {
+      this.auditOpen = false;
+      this.resetAudit();
     },
     // 表单重置
     reset() {
@@ -331,18 +391,24 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null
-      }
-      this.resetForm("form")
+      };
+      this.resetForm("form");
+    },
+    // 审核表单重置
+    resetAudit() {
+      this.auditForm = {};
+      this.uploadFile = null;
+      this.resetForm("auditForm");
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1
-      this.getList()
+      this.queryParams.pageNum = 1;
+      this.getList();
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm")
-      this.handleQuery()
+      this.resetForm("queryForm");
+      this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
@@ -352,19 +418,19 @@ export default {
     },
     /** 新增按钮操作 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加AI图片"
+      this.reset();
+      this.open = true;
+      this.title = "添加AI图片";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      this.reset()
+      this.reset();
       const id = row.id || this.ids
       getPicture(id).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改AI图片"
-      })
+        this.form = response.data;
+        this.open = true;
+        this.title = "修改AI图片";
+      });
     },
     /** 提交按钮 */
     submitForm() {
@@ -372,36 +438,74 @@ export default {
         if (valid) {
           if (this.form.id != null) {
             updatePicture(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
           } else {
             addPicture(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
           }
         }
-      })
+      });
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids
+      const ids = row.id || this.ids;
       this.$modal.confirm('是否确认删除AI图片编号为"' + ids + '"的数据项？').then(function() {
-        return delPicture(ids)
+        return delPicture(ids);
       }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess("删除成功")
-      }).catch(() => {})
+        this.getList();
+        this.$modal.msgSuccess("删除成功");
+      }).catch(() => {});
     },
     /** 导出按钮操作 */
     handleExport() {
       this.download('system/picture/export', {
         ...this.queryParams
       }, `picture_${new Date().getTime()}.xlsx`)
+    },
+    /** 更新审核信息按钮操作 */
+    handleUpdateAudit() {
+      this.resetAudit();
+      this.auditOpen = true;
+    },
+    /** 处理文件选择 */
+    handleFileChange(file) {
+      this.uploadFile = file.raw;
+    },
+    /** 处理文件移除 */
+    handleFileRemove() {
+      this.uploadFile = null;
+    },
+    /** 提交审核信息 */
+    submitAuditForm() {
+      if (!this.uploadFile) {
+        this.$modal.msgError("请先选择Excel文件");
+        return;
+      }
+
+      this.auditLoading = true;
+      
+      // 创建FormData对象
+      const formData = new FormData();
+      formData.append("file", this.uploadFile);
+
+      // 调用更新审核状态接口
+      updateAuditStatus(formData).then(response => {
+        this.$modal.msgSuccess("审核状态更新成功");
+        this.auditOpen = false;
+        this.getList();
+      }).catch(error => {
+        console.error(error);
+        this.$modal.msgError("审核状态更新失败");
+      }).finally(() => {
+        this.auditLoading = false;
+      });
     }
   }
-}
+};
 </script>

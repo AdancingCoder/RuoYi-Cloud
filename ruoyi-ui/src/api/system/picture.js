@@ -42,3 +42,15 @@ export function delPicture(id) {
     method: 'delete'
   })
 }
+
+// 批量更新审核状态
+export function updateAuditStatus(data) {
+  return request({
+    url: '/system/picture/updateAuditStatus',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

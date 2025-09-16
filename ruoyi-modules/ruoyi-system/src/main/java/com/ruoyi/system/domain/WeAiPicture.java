@@ -53,7 +53,7 @@ public class WeAiPicture extends BaseEntity
     private Long pid;
 
     /** 状态（0,1,2） */
-    @Excel(name = "状态", readConverterExp = "0=待审核,1=审核通过，2=审核未通过", combo = {"待审核", "审核通过", "审核未通过"})
+    @Excel(name = "状态", readConverterExp = "0=待审核,1=审核通过,2=审核未通过", combo = {"待审核", "审核通过", "审核未通过"}, cellType = Excel.ColumnType.STRING)
     private String dataStatus;
 
     /** 删除标志（0代表存在 2代表删除） */
@@ -151,13 +151,37 @@ public class WeAiPicture extends BaseEntity
 
     public void setDataStatus(String dataStatus)
     {
-        this.dataStatus = dataStatus;
+        // 处理状态文本到代码的转换
+        if ("待审核".equals(dataStatus)) {
+            this.dataStatus = "0";
+        } else if ("审核通过".equals(dataStatus)) {
+            this.dataStatus = "1";
+        } else if ("审核未通过".equals(dataStatus)) {
+            this.dataStatus = "2";
+        } else if ("0".equals(dataStatus) || "1".equals(dataStatus) || "2".equals(dataStatus)) {
+            // 直接设置代码值（从Excel导入时已经转换过的值）
+            this.dataStatus = dataStatus;
+        } else if (dataStatus == null || dataStatus.isEmpty()) {
+            // 处理空值情况
+            this.dataStatus = dataStatus;
+        } else {
+            this.dataStatus = dataStatus;
+        }
     }
 
     public String getDataStatus()
     {
         return dataStatus;
     }
+
+  /*  public String getDataStatusLabel() {
+        switch (dataStatus) {
+            case "0": return "待审核";
+            case "1": return "审核通过";
+            case "2": return "审核未通过";
+            default: return dataStatus;
+        }
+    }*/
 
     public void setDelFlag(String delFlag)
     {
