@@ -166,7 +166,7 @@ public class WeLookController extends BaseController
                         look.setBackWeId(back.getBackWeId());
                         look.setBackUrl(back.getBackUrl());
                         // 设置默认名称为"服装+模特+背景"组合
-                        look.setName(cloth.getName() + "+" + model.getName() + "+" + back.getName());
+                        look.setName(cloth.getType() + "+" + cloth.getName() + "+" + model.getName() + "+" + back.getName());
                         // 设置外观类型与服装类型一致
                         look.setType(cloth.getType());
                         weLookService.insertWeLook(look);
@@ -192,7 +192,7 @@ public class WeLookController extends BaseController
         }
 
         // 异步处理任务
-        //new Thread(() -> {
+        new Thread(() -> {
             for (WeLook look : looks) {
                 try {
                     log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
@@ -266,7 +266,7 @@ public class WeLookController extends BaseController
                 }
             }
             log.info("批量生成looks处理完成");
-        //}).start();
+        }).start();
 
         return AjaxResult.success("任务已提交，正在后台处理");
     }
@@ -303,6 +303,7 @@ public class WeLookController extends BaseController
                         log.info("创建AI图片任务成功，taskId: {}", taskId);
 
                         // 2. 执行AI图片任务
+                        //定义prompt,值为 back.getPromot() + look.getType()对应的提示词
                         String executionId = WeshopUtils.executeAiImageTask(taskId, back.getPromot());
                         if (executionId != null) {
                             log.info("执行AI图片任务成功，executionId: {}", executionId);

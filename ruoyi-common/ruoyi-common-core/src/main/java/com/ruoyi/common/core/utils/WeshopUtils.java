@@ -132,8 +132,9 @@ public class WeshopUtils {
             params.put("pose", "originalImagePose");
             params.put("generatedContent", "freeCreation");
             params.put("maskType", "autoApparelSegment");
-            params.put("locationId", backWeId);
-            params.put("fashionModelId", modelWeId);
+            // 修复：使用Long.valueOf替换Integer.valueOf以支持更大的数值
+            params.put("locationId", Long.valueOf(backWeId));
+            params.put("fashionModelId", Long.valueOf(modelWeId));
             params.put("batchCount", 1);
             requestData.put("params", params);
 
