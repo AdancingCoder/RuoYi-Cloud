@@ -42,3 +42,12 @@ export function delBack(id) {
     method: 'delete'
   })
 }
+
+// 生成模特及背景
+export function generateModelAndBack(data) {
+  return request({
+    url: '/system/back/generate',
+    method: 'post',
+    data: data
+  })
+}

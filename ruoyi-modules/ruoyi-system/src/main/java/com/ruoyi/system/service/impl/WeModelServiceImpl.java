@@ -31,6 +31,18 @@ public class WeModelServiceImpl implements IWeModelService
     {
         return weModelMapper.selectWeModelById(id);
     }
+    
+    /**
+     * 根据外部ID查询模特
+     * 
+     * @param modelWeId 模特外部ID
+     * @return 模特
+     */
+    @Override
+    public WeModel selectWeModelByWeId(String modelWeId)
+    {
+        return weModelMapper.selectWeModelByWeId(modelWeId);
+    }
 
     /**
      * 查询模特列表

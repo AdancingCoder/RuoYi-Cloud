@@ -18,6 +18,14 @@ public interface IWeBackService
      * @return 背景
      */
     public WeBack selectWeBackById(Long id);
+    
+    /**
+     * 根据外部ID查询背景
+     * 
+     * @param backWeId 背景外部ID
+     * @return 背景
+     */
+    public WeBack selectWeBackByWeId(String backWeId);
 
     /**
      * 查询背景列表

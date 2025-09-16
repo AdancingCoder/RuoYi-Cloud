@@ -37,6 +37,11 @@
         <include refid="selectWeModelVo"/>
         where id = #{id}
     </select>
+    
+    <select id="selectWeModelByWeId" parameterType="String" resultMap="WeModelResult">
+        <include refid="selectWeModelVo"/>
+        where model_we_id = #{modelWeId}
+    </select>
 
     <insert id="insertWeModel" parameterType="WeModel" useGeneratedKeys="true" keyProperty="id">
         insert into we_model

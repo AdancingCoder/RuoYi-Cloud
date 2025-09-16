@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 16/09/2025 17:20:22
+ Date: 16/09/2025 18:22:46
 */
 
 SET NAMES utf8mb4;
@@ -1227,11 +1227,60 @@ CREATE TABLE `we_back`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '背景表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 50 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '背景表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of we_back
 -- ----------------------------
+INSERT INTO `we_back` VALUES (1, 'tan22', 'https://ai-image.weshop.com/20250908_1_6242fdf7-19b2-405e-a986-06aae5fd9ecb_632x840.jpg_width256.webp', '10000341765', NULL, '2', '0', '', '2025-09-16 18:18:19', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (2, 'tan96', 'https://ai-image.weshop.com/20250909_1_b4e7a4fc-3d76-4593-9aca-c2ddb18e27b6_1024x1280.png_width256.webp', '10000344115', NULL, '2', '0', '', '2025-09-16 18:18:19', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (3, 'tan90', 'https://ai-image.weshop.com/20250909_1_2fa75298-c220-4c56-bb77-eee71e22586f_720x896.png_width256.webp', '10000344097', NULL, '2', '0', '', '2025-09-16 18:18:19', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (4, 'tan59', 'https://ai-image.weshop.com/20250909_1_d3f6c449-ee04-4d99-9647-9e22bb3f4421_1080x1080.png_width256.webp', '10000343910', NULL, '2', '0', '', '2025-09-16 18:18:19', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (5, 'tan54', 'https://ai-image.weshop.com/20250909_1_c8f3df8d-2be8-4993-9ec1-3e0e5f3b396d_736x1304.png_width256.webp', '10000343903', NULL, '2', '0', '', '2025-09-16 18:18:19', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (6, 'tan28', 'https://ai-image.weshop.com/20250909_1_23b24b1f-5e64-4b27-aacf-40704de7cfa2_736x976.png_width256.webp', '10000343270', NULL, '2', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (7, 'tan27', 'https://ai-image.weshop.com/20250909_1_f0567e85-aec5-40d2-ab54-d083e69aa6e2_1080x1512.png_width256.webp', '10000343269', NULL, '2', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (8, 'tan49', 'https://ai-image.weshop.com/20250909_1_55d7b7cc-e105-4740-8a85-dbdbcc86d811_736x976.png_width256.webp', '10000343898', NULL, '2', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (9, 'bsd49', 'https://ai-image.weshop.com/20250911_1_3a1da09c-7f5d-4b02-89df-5ea02190ffcc_744x1256.png_width256.webp', '10000346067', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (10, 'bsd50', 'https://ai-image.weshop.com/20250911_1_a107ad80-70ae-45f8-a25a-d64d3969b8f2_744x1080.png_width256.webp', '10000346066', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (11, 'bsd48', 'https://ai-image.weshop.com/20250911_1_39ec5c4b-746a-49c4-9a4d-8db455c313d1_744x1040.png_width256.webp', '10000346063', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (12, 'bsd47', 'https://ai-image.weshop.com/20250911_1_4c4ae953-bbb2-4a99-92e4-da58285b96cb_784x1000.png_width256.webp', '10000346062', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (13, 'bsd46', 'https://ai-image.weshop.com/20250911_1_07328ac2-e8ee-4419-9a8c-e33634322c86_704x960.png_width256.webp', '10000346060', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (14, 'bsd44', 'https://ai-image.weshop.com/20250911_1_52d79728-9a20-4301-9200-6c37422abbd0_848x1280.png_width256.webp', '10000346050', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (15, 'bsd42', 'https://ai-image.weshop.com/20250911_1_0f640235-a7be-49ba-a397-d846fa88cdb0_672x1200.png_width256.webp', '10000346048', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (16, 'bsd40', 'https://ai-image.weshop.com/20250911_1_4418010f-b529-4512-88fc-503fb949a451_848x1280.png_width256.webp', '10000346046', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (17, 'bsd39', 'https://ai-image.weshop.com/20250911_1_2eadc294-7d79-4b40-ad16-abbaea4e4737_736x976.png_width256.webp', '10000346045', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (18, 'bsd38', 'https://ai-image.weshop.com/20250911_1_919e5825-7b95-4b2c-93c0-48b19f8f134b_912x1280.png_width256.webp', '10000346043', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (19, 'bsd36', 'https://ai-image.weshop.com/20250911_1_8ca1bf47-8c4b-4019-a4e4-ad3f25c43236_728x944.png_width256.webp', '10000346041', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (20, 'bsd34', 'https://ai-image.weshop.com/20250911_1_04edf1af-f363-45fd-a707-286eede93b74_736x1056.png_width256.webp', '10000346039', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (21, 'bsd33', 'https://ai-image.weshop.com/20250911_1_e91744e7-25a0-4883-8363-674ce3a83394_736x976.png_width256.webp', '10000346038', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (22, 'bsd28', 'https://ai-image.weshop.com/20250911_1_5a5b83fe-7fbd-462f-b896-6111791dcd8b_736x920.png_width256.webp', '10000346032', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (23, 'bsd27', 'https://ai-image.weshop.com/20250911_1_f5b95b6f-c769-427b-9fc2-fb0b4e0cc128_960x1280.jpg_width256.webp', '10000346031', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (24, 'bsd26', 'https://ai-image.weshop.com/20250911_1_f9a3bf2e-41c7-4ea1-b8ef-cdb8bb11dd03_744x936.png_width256.webp', '10000346030', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (25, 'bsd25', 'https://ai-image.weshop.com/20250911_1_ad50ea7e-06ca-49fa-9e6a-1130cd96d3fb_648x904.png_width256.webp', '10000346029', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (26, 'bsd24', 'https://ai-image.weshop.com/20250911_1_9e3df97c-88d7-4211-8935-16077442d97a_560x704.png_width256.webp', '10000346028', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (27, 'bsd23', 'https://ai-image.weshop.com/20250911_1_642eac92-3a3a-4f43-a730-66ebc3640229_728x976.png_width256.webp', '10000346027', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (28, 'bsd22', 'https://ai-image.weshop.com/20250911_1_c67fae69-aa79-47cb-bc8e-950865ab1a28_720x960.png_width256.webp', '10000346026', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (29, 'bsd21', 'https://ai-image.weshop.com/20250911_1_5e6e1718-6d12-4ae9-b4a4-39910c582956_736x1104.png_width256.webp', '10000346025', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (30, 'bsd20', 'https://ai-image.weshop.com/20250911_1_e89f2e0a-0d58-42f7-9f69-c9d74bf7f2a2_736x920.png_width256.webp', '10000346024', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (31, 'bsd19', 'https://ai-image.weshop.com/20250911_1_9ff12b24-3ade-496b-afd9-bf26fa06e222_960x1200.png_width256.webp', '10000346023', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (32, 'bsd18', 'https://ai-image.weshop.com/20250911_1_6b2a74f8-1686-4982-9cf5-9a17fe17c9e1_792x1064.png_width256.webp', '10000346022', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (33, 'bsd17', 'https://ai-image.weshop.com/20250911_1_82fb3619-f06b-4101-a0fb-26891ae93a59_736x1104.png_width256.webp', '10000346021', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (34, 'bsd16', 'https://ai-image.weshop.com/20250911_1_98339ef4-e21c-49d1-b429-acac0d55cd11_1080x1440.png_width256.webp', '10000346019', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (35, 'bsd15', 'https://ai-image.weshop.com/20250911_1_af0add17-912e-4b9b-b6ea-028ba6a32874_736x1104.png_width256.webp', '10000346018', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (36, 'bsd14', 'https://ai-image.weshop.com/20250911_1_5c487bab-3b9d-4b28-8fab-8eb261ddcebd_824x536.png_width256.webp', '10000346017', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (37, 'bsd13', 'https://ai-image.weshop.com/20250911_1_ea6b5c44-ea9f-4d1d-8fd6-eb8f97104589_1080x1344.png_width256.webp', '10000346016', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (38, 'bsd12', 'https://ai-image.weshop.com/20250911_1_8c5b0ebd-2d76-4adc-ad78-690c53e825bd_1200x1800.png_width256.webp', '10000346014', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (39, 'bsd11', 'https://ai-image.weshop.com/20250911_1_bb77704c-cd10-47a2-8e03-f685ea96fb34_688x864.png_width256.webp', '10000346013', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (40, 'bsd10', 'https://ai-image.weshop.com/20250911_1_a4ce2d52-3402-4afc-9aa5-9d81486799be_824x976.png_width256.webp', '10000346012', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (41, 'bsd9', 'https://ai-image.weshop.com/20250911_1_e56cdb23-8729-4f48-af6c-3c4f2356acaa_736x976.png_width256.webp', '10000346010', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (42, 'bsd8', 'https://ai-image.weshop.com/20250911_1_5d9765f2-4a6b-4121-88c1-e041fd534ca2_960x1280.png_width256.webp', '10000346009', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (43, 'bsd7', 'https://ai-image.weshop.com/20250911_1_bca6ab36-22e2-40f6-8b22-9e32e5b2334a_848x1280.png_width256.webp', '10000346008', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (44, 'bsd6', 'https://ai-image.weshop.com/20250911_1_ca8c45bc-8a0c-4416-ae7d-eaae540ee761_736x1208.png_width256.webp', '10000346007', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (45, 'bsd5', 'https://ai-image.weshop.com/20250911_1_d9a92c70-20e2-40b5-9fc0-ff56e04cb504_736x1096.png_width256.webp', '10000346006', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (46, 'bsd4', 'https://ai-image.weshop.com/20250911_1_2bbb454e-e189-4983-a1f5-d974ce7a4679_960x1280.png_width256.webp', '10000346005', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (47, 'bsd3', 'https://ai-image.weshop.com/20250911_1_2bc4ee3f-a212-46a0-bcc7-27be02017da2_800x1200.png_width256.webp', '10000345963', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (48, 'bsd2', 'https://ai-image.weshop.com/20250911_1_aad04a58-9523-4bd9-a9e3-d282401e0d8e_1024x1280.png_width256.webp', '10000345961', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_back` VALUES (49, 'bsd1', 'https://ai-image.weshop.com/20250911_1_b52b9ed0-37f1-495e-b0bc-1b37f3e9d689_848x1280.png_width256.webp', '10000345954', NULL, '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for we_cloth
@@ -1304,10 +1353,13 @@ CREATE TABLE `we_model`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '模特表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '模特表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of we_model
 -- ----------------------------
+INSERT INTO `we_model` VALUES (1, 'tan1', 'https://ai-image.weshop.com/20250908_1_75b8cdc4-9ce8-4158-b0bb-5f08f7958af2_736x946.png_crop512.jpeg', '10000341607', '2', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_model` VALUES (2, 'bsd1', 'https://ai-image.weshop.com/20250911_1_805bf342-a8f1-4960-b233-7d5103fdcb9c_640x800.png_crop512.jpeg', '10000345931', '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
+INSERT INTO `we_model` VALUES (3, 'bsd2', 'https://ai-image.weshop.com/20250911_1_3c3602d7-777f-4655-98a1-78e4248a2e6d_1024x1280.png_crop512.jpeg', '10000345929', '1', '0', '', '2025-09-16 18:18:20', '', NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

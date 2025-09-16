@@ -18,6 +18,14 @@ public interface WeModelMapper
      * @return 模特
      */
     public WeModel selectWeModelById(Long id);
+    
+    /**
+     * 根据外部ID查询模特
+     * 
+     * @param modelWeId 模特外部ID
+     * @return 模特
+     */
+    public WeModel selectWeModelByWeId(String modelWeId);
 
     /**
      * 查询模特列表

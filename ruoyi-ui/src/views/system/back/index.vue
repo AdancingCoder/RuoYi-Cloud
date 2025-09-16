@@ -84,6 +84,16 @@
           v-hasPermi="['system:back:export']"
         >导出</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="info"
+          plain
+          icon="el-icon-upload"
+          size="mini"
+          @click="handleGenerateModelAndBack"
+          v-hasPermi="['system:back:generate']"
+        >生成模特及背景</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -179,11 +189,35 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 生成模特及背景对话框 -->
+    <el-dialog title="生成模特及背景" :visible.sync="generateOpen" width="500px" append-to-body>
+      <el-form ref="generateForm" :model="generateForm">
+        <el-form-item label="JSON文件">
+          <el-upload
+            class="upload-demo"
+            drag
+            action=""
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :file-list="fileList"
+          >
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传json文件，且不超过10MB</div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitGenerateForm" :loading="generateLoading">确 定</el-button>
+        <el-button @click="cancelGenerate">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listBack, getBack, delBack, addBack, updateBack } from "@/api/system/back"
+import { listBack, getBack, delBack, addBack, updateBack, generateModelAndBack } from "@/api/system/back"
 
 export default {
   name: "Back",
@@ -208,6 +242,14 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否显示生成弹出层
+      generateOpen: false,
+      // 生成按钮loading
+      generateLoading: false,
+      // 文件列表
+      fileList: [],
+      // JSON文件内容
+      jsonFile: null,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -221,9 +263,10 @@ export default {
       },
       // 表单参数
       form: {},
+      // 生成表单参数
+      generateForm: {},
       // 表单校验
-      rules: {
-      }
+      rules: {}
     }
   },
   created() {
@@ -244,6 +287,11 @@ export default {
       this.open = false
       this.reset()
     },
+    // 取消生成按钮
+    cancelGenerate() {
+      this.generateOpen = false
+      this.resetGenerate()
+    },
     // 表单重置
     reset() {
       this.form = {
@@ -261,6 +309,13 @@ export default {
         remark: null
       }
       this.resetForm("form")
+    },
+    // 生成表单重置
+    resetGenerate() {
+      this.generateForm = {}
+      this.fileList = []
+      this.jsonFile = null
+      this.resetForm("generateForm")
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -329,6 +384,54 @@ export default {
       this.download('system/back/export', {
         ...this.queryParams
       }, `back_${new Date().getTime()}.xlsx`)
+    },
+    /** 生成模特及背景按钮操作 */
+    handleGenerateModelAndBack() {
+      this.resetGenerate()
+      this.generateOpen = true
+    },
+    // 处理文件选择
+    handleFileChange(file) {
+      const isJson = file.raw.type === 'application/json' || file.name.endsWith('.json')
+      const isLt10M = file.raw.size / 1024 / 1024 < 10
+
+      if (!isJson) {
+        this.$message.error('上传文件只能是 json 格式!')
+        return false
+      }
+      if (!isLt10M) {
+        this.$message.error('上传文件大小不能超过 10MB!')
+        return false
+      }
+
+      // 读取文件内容
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          this.jsonFile = JSON.parse(e.target.result)
+        } catch (error) {
+          this.$message.error('JSON文件格式错误，请检查文件内容!')
+        }
+      }
+      reader.readAsText(file.raw)
+    },
+    // 提交生成表单
+    submitGenerateForm() {
+      if (!this.jsonFile) {
+        this.$message.error('请先选择JSON文件!')
+        return
+      }
+
+      this.generateLoading = true
+      generateModelAndBack(this.jsonFile).then(response => {
+        this.$modal.msgSuccess("生成成功")
+        this.generateOpen = false
+        this.getList()
+      }).catch(() => {
+        this.$modal.msgError("生成失败")
+      }).finally(() => {
+        this.generateLoading = false
+      })
     }
   }
 }

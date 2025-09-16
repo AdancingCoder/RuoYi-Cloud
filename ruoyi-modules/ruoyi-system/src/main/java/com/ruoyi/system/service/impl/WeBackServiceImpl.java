@@ -31,6 +31,18 @@ public class WeBackServiceImpl implements IWeBackService
     {
         return weBackMapper.selectWeBackById(id);
     }
+    
+    /**
+     * 根据外部ID查询背景
+     * 
+     * @param backWeId 背景外部ID
+     * @return 背景
+     */
+    @Override
+    public WeBack selectWeBackByWeId(String backWeId)
+    {
+        return weBackMapper.selectWeBackByWeId(backWeId);
+    }
 
     /**
      * 查询背景列表
