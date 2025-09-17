@@ -7,7 +7,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
  * 背景对象 we_back
- * 
+ *
  * @author ruoyi
  * @date 2025-09-14
  */
@@ -23,11 +23,11 @@ public class WeBack extends BaseEntity
     private String name;
 
     /** 背景图片URL */
-    @Excel(name = "背景图片URL")
+    //@Excel(name = "背景图片URL")
     private String backUrl;
 
     /** 背景ID */
-    @Excel(name = "背景ID")
+    //@Excel(name = "背景ID")
     private String backWeId;
 
     /** 背景描述 */
@@ -35,78 +35,78 @@ public class WeBack extends BaseEntity
     private String promot;
 
     /** 背景类型 */
-    @Excel(name = "背景类型")
+    //@Excel(name = "背景类型")
     private String type;
 
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
 
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }
 
-    public Long getId() 
+    public Long getId()
     {
         return id;
     }
 
-    public void setName(String name) 
+    public void setName(String name)
     {
         this.name = name;
     }
 
-    public String getName() 
+    public String getName()
     {
         return name;
     }
 
-    public void setBackUrl(String backUrl) 
+    public void setBackUrl(String backUrl)
     {
         this.backUrl = backUrl;
     }
 
-    public String getBackUrl() 
+    public String getBackUrl()
     {
         return backUrl;
     }
 
-    public void setBackWeId(String backWeId) 
+    public void setBackWeId(String backWeId)
     {
         this.backWeId = backWeId;
     }
 
-    public String getBackWeId() 
+    public String getBackWeId()
     {
         return backWeId;
     }
 
-    public void setPromot(String promot) 
+    public void setPromot(String promot)
     {
         this.promot = promot;
     }
 
-    public String getPromot() 
+    public String getPromot()
     {
         return promot;
     }
 
-    public void setType(String type) 
+    public void setType(String type)
     {
         this.type = type;
     }
 
-    public String getType() 
+    public String getType()
     {
         return type;
     }
 
-    public void setDelFlag(String delFlag) 
+    public void setDelFlag(String delFlag)
     {
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag() 
+    public String getDelFlag()
     {
         return delFlag;
     }

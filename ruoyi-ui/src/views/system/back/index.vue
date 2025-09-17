@@ -94,6 +94,24 @@
           v-hasPermi="['system:back:generate']"
         >生成模特及背景</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="info"
+          plain
+          icon="el-icon-upload"
+          size="mini"
+          @click="handleUpdatePrompts"
+          v-hasPermi="['system:back:updatePrompts']"
+        >更新提示词</el-button>
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="importTemplate"
+          v-hasPermi="['system:back:updatePrompts']"
+        >下载模板</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -190,34 +208,40 @@
       </div>
     </el-dialog>
 
-    <!-- 生成模特及背景对话框 -->
-    <el-dialog title="生成模特及背景" :visible.sync="generateOpen" width="500px" append-to-body>
-      <el-form ref="generateForm" :model="generateForm">
-        <el-form-item label="JSON文件">
-          <el-upload
-            class="upload-demo"
-            drag
-            action=""
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            :file-list="fileList"
-          >
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只能上传json文件，且不超过10MB</div>
-          </el-upload>
-        </el-form-item>
-      </el-form>
+    <!-- 更新提示词对话框 -->
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :on-error="handleFileError"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip text-center" slot="tip">
+          <div class="el-upload__tip" slot="tip">
+            *.xlsx、*.xls格式文件
+          </div>
+        </div>
+      </el-upload>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitGenerateForm" :loading="generateLoading">确 定</el-button>
-        <el-button @click="cancelGenerate">取 消</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listBack, getBack, delBack, addBack, updateBack, generateModelAndBack } from "@/api/system/back"
+import { listBack, getBack, delBack, addBack, updateBack, generateModelAndBack, updatePrompts } from "@/api/system/back"
+import { parseTime } from "@/utils"
 
 export default {
   name: "Back",
@@ -242,14 +266,19 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
-      // 是否显示生成弹出层
-      generateOpen: false,
-      // 生成按钮loading
-      generateLoading: false,
-      // 文件列表
-      fileList: [],
-      // JSON文件内容
-      jsonFile: null,
+      // 上传参数
+      upload: {
+        // 是否显示弹出层（更新提示词）
+        open: false,
+        // 弹出层标题（更新提示词）
+        title: "更新提示词",
+        // 是否禁用上传
+        isUploading: false,
+        // 设置上传的请求头部
+        headers: { Authorization: "Bearer " + this.$store.getters.token },
+        // 上传的地址
+        url: process.env.VUE_APP_BASE_API + "/system/back/updatePrompts"
+      },
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -263,10 +292,21 @@ export default {
       },
       // 表单参数
       form: {},
-      // 生成表单参数
-      generateForm: {},
       // 表单校验
-      rules: {}
+      rules: {
+        name: [
+          { required: true, message: "背景名称不能为空", trigger: "blur" }
+        ],
+        backUrl: [
+          { required: true, message: "背景图片URL不能为空", trigger: "blur" }
+        ],
+        backWeId: [
+          { required: true, message: "背景ID不能为空", trigger: "blur" }
+        ],
+        type: [
+          { required: true, message: "背景类型不能为空", trigger: "blur" }
+        ]
+      }
     }
   },
   created() {
@@ -292,6 +332,11 @@ export default {
       this.generateOpen = false
       this.resetGenerate()
     },
+    // 取消更新提示词按钮
+    cancelUpdatePrompts() {
+      this.updatePromptsOpen = false
+      this.resetUpdatePrompts()
+    },
     // 表单重置
     reset() {
       this.form = {
@@ -316,6 +361,13 @@ export default {
       this.fileList = []
       this.jsonFile = null
       this.resetForm("generateForm")
+    },
+    // 更新提示词表单重置
+    resetUpdatePrompts() {
+      this.updatePromptsForm = {}
+      this.promptFileList = []
+      this.excelFile = null
+      this.resetForm("updatePromptsForm")
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -385,53 +437,44 @@ export default {
         ...this.queryParams
       }, `back_${new Date().getTime()}.xlsx`)
     },
-    /** 生成模特及背景按钮操作 */
+    /** 生成模特及背景 */
     handleGenerateModelAndBack() {
-      this.resetGenerate()
-      this.generateOpen = true
+      this.$modal.confirm('是否确认生成模特及背景数据？').then(function() {
+        return generateModelAndBack({});
+      }).then((response) => {
+        this.$modal.msgSuccess(response.msg);
+        this.getList();
+      }).catch(() => {});
     },
-    // 处理文件选择
-    handleFileChange(file) {
-      const isJson = file.raw.type === 'application/json' || file.name.endsWith('.json')
-      const isLt10M = file.raw.size / 1024 / 1024 < 10
-
-      if (!isJson) {
-        this.$message.error('上传文件只能是 json 格式!')
-        return false
-      }
-      if (!isLt10M) {
-        this.$message.error('上传文件大小不能超过 10MB!')
-        return false
-      }
-
-      // 读取文件内容
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        try {
-          this.jsonFile = JSON.parse(e.target.result)
-        } catch (error) {
-          this.$message.error('JSON文件格式错误，请检查文件内容!')
-        }
-      }
-      reader.readAsText(file.raw)
+    /** 更新提示词 */
+    handleUpdatePrompts() {
+      this.upload.open = true;
     },
-    // 提交生成表单
-    submitGenerateForm() {
-      if (!this.jsonFile) {
-        this.$message.error('请先选择JSON文件!')
-        return
-      }
-
-      this.generateLoading = true
-      generateModelAndBack(this.jsonFile).then(response => {
-        this.$modal.msgSuccess("生成成功")
-        this.generateOpen = false
-        this.getList()
-      }).catch(() => {
-        this.$modal.msgError("生成失败")
-      }).finally(() => {
-        this.generateLoading = false
-      })
+    /** 下载模板操作 */
+    importTemplate() {
+      this.download('system/back/importTemplate', {
+      }, `back_template_${parseTime(Date.now(), '{y}{m}{d}')}.xlsx`)
+    },
+    // 文件提交处理
+    submitFileForm() {
+      this.$refs.upload.submit();
+    },
+    // 文件上传中处理
+    handleFileUploadProgress(event, file, fileList) {
+      this.upload.isUploading = true;
+    },
+    // 文件上传成功处理
+    handleFileSuccess(response, file, fileList) {
+      this.upload.open = false;
+      this.upload.isUploading = false;
+      this.$refs.upload.clearFiles();
+      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+      this.getList();
+    },
+    // 文件上传失败处理
+    handleFileError(error, file, fileList) {
+      this.upload.isUploading = false;
+      this.$modal.msgError("上传失败，请重试");
     }
   }
 }

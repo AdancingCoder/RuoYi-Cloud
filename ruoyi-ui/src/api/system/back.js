@@ -51,3 +51,15 @@ export function generateModelAndBack(data) {
     data: data
   })
 }
+
+// 更新提示词
+export function updatePrompts(data) {
+  return request({
+    url: '/system/back/updatePrompts',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

@@ -3,7 +3,7 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.WeBackMapper">
-    
+
     <resultMap type="WeBack" id="WeBackResult">
         <result property="id"    column="id"    />
         <result property="name"    column="name"    />
@@ -25,21 +25,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectWeBackList" parameterType="WeBack" resultMap="WeBackResult">
         <include refid="selectWeBackVo"/>
-        <where>  
+        <where>
             <if test="id != null "> and id = #{id}</if>
-            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="name != null  and name != ''"> and name = #{name}</if>
             <if test="backUrl != null  and backUrl != ''"> and back_url = #{backUrl}</if>
             <if test="backWeId != null  and backWeId != ''"> and back_we_id = #{backWeId}</if>
             <if test="promot != null  and promot != ''"> and promot = #{promot}</if>
             <if test="type != null  and type != ''"> and type = #{type}</if>
         </where>
     </select>
-    
+
     <select id="selectWeBackById" parameterType="Long" resultMap="WeBackResult">
         <include refid="selectWeBackVo"/>
         where id = #{id}
     </select>
-    
+
     <select id="selectWeBackByWeId" parameterType="String" resultMap="WeBackResult">
         <include refid="selectWeBackVo"/>
         where back_we_id = #{backWeId}
@@ -98,7 +98,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteWeBackByIds" parameterType="String">
-        delete from we_back where id in 
+        delete from we_back where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
