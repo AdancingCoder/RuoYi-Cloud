@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
@@ -216,84 +219,108 @@ public class WeLookController extends BaseController
             looks.add(weLookService.selectWeLookById(id));
         }
 
+        // 创建固定大小的线程池，避免过多并发请求
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
         // 异步处理任务
-        //new Thread(() -> {
-            for (WeLook look : looks) {
-                try {
-                    log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (WeLook look : looks) {
+            // 为每个look创建独立的异步任务，确保数据不会错乱
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                processLook(look);
+            }, executorService);
+            futures.add(future);
+        }
 
-                    // 1. 创建任务
-                    String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
-                    //String taskId ="68c8004a7af440cb455c057f";
-                    if (taskId != null) {
-                        log.info("创建任务成功，taskId: {}", taskId);
-                        // 更新任务ID
-                        look.setTaskId(taskId);
-                        weLookService.updateWeLook(look);
-
-                        // 2. 执行任务
-                        String executionId = WeshopUtils.executeTask(taskId, look.getModelWeId(), look.getBackWeId());
-                        if (executionId != null) {
-                            log.info("执行任务成功，executionId: {}", executionId);
-                            // 更新执行ID
-                            look.setExecuteId(executionId);
-                            weLookService.updateWeLook(look);
-
-                            // 3. 轮询任务状态直到完成
-                            String status = "Pending";
-                            int retryCount = 0;
-                            int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
-
-                            while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
-                                Thread.sleep(5000); // 每5秒查询一次
-                                retryCount++;
-                                log.info("第{}次轮询任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
-
-                                WeshopUtils.TaskResult result = WeshopUtils.queryTask(taskId, executionId);
-                                if (result != null) {
-                                    status = result.getStatus();
-                                    log.info("任务状态: {}", status);
-
-                                    // 如果任务成功完成，更新look_url
-                                    if ("Success".equals(status)) {
-                                        look.setLookUrl(result.getImageUrl());
-                                        weLookService.updateWeLook(look);
-                                        log.info("任务成功完成，图片URL: {}", result.getImageUrl());
-                                    } else if ("Failed".equals(status)) {
-                                        look.setLookUrl("失败");
-                                        weLookService.updateWeLook(look);
-                                        log.info("任务执行失败");
-                                    }
-                                } else {
-                                    log.warn("查询任务返回空结果");
-                                }
-                            }
-
-                            if (retryCount >= maxRetries) {
-                                log.error("任务超时，未在规定时间内完成，taskId: {}", taskId);
-                                look.setLookUrl("超时");
-                                weLookService.updateWeLook(look);
-                            }
-                        } else {
-                            log.error("执行任务失败，taskId: {}", taskId);
-                        }
-                    } else {
-                        log.error("创建任务失败，look ID: {}", look.getId());
-                    }
-                } catch (Exception e) {
-                    log.error("处理look ID {} 时出错", look.getId(), e);
-                    try {
-                        look.setLookUrl("异常");
-                        weLookService.updateWeLook(look);
-                    } catch (Exception updateException) {
-                        log.error("更新look异常状态失败，look ID: {}", look.getId(), updateException);
-                    }
-                }
-            }
-            log.info("批量生成looks处理完成");
-        //}).start();
+        // 等待所有任务完成
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> {
+                    log.info("所有looks处理完成");
+                    executorService.shutdown();
+                })
+                .exceptionally(ex -> {
+                    log.error("处理looks时发生异常", ex);
+                    executorService.shutdown();
+                    return null;
+                });
 
         return AjaxResult.success("任务已提交，正在后台处理");
+    }
+
+    /**
+     * 处理单个look的生成任务
+     * @param look 需要处理的look对象
+     */
+    private void processLook(WeLook look) {
+        try {
+            log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
+
+            // 1. 创建任务
+            String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
+            if (taskId != null) {
+                log.info("创建任务成功，taskId: {}", taskId);
+                // 更新任务ID
+                look.setTaskId(taskId);
+                weLookService.updateWeLook(look);
+
+                // 2. 执行任务
+                String executionId = WeshopUtils.executeTask(taskId, look.getModelWeId(), look.getBackWeId());
+                if (executionId != null) {
+                    log.info("执行任务成功，executionId: {}", executionId);
+                    // 更新执行ID
+                    look.setExecuteId(executionId);
+                    weLookService.updateWeLook(look);
+
+                    // 3. 轮询任务状态直到完成
+                    String status = "Pending";
+                    int retryCount = 0;
+                    int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
+
+                    while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
+                        Thread.sleep(5000); // 每5秒查询一次
+                        retryCount++;
+                        log.info("第{}次轮询任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
+
+                        WeshopUtils.TaskResult result = WeshopUtils.queryTask(taskId, executionId);
+                        if (result != null) {
+                            status = result.getStatus();
+                            log.info("任务状态: {}", status);
+
+                            // 如果任务成功完成，更新look_url
+                            if ("Success".equals(status)) {
+                                look.setLookUrl(result.getImageUrl());
+                                weLookService.updateWeLook(look);
+                                log.info("任务成功完成，图片URL: {}", result.getImageUrl());
+                            } else if ("Failed".equals(status)) {
+                                look.setLookUrl("失败");
+                                weLookService.updateWeLook(look);
+                                log.info("任务执行失败");
+                            }
+                        } else {
+                            log.warn("查询任务返回空结果");
+                        }
+                    }
+
+                    if (retryCount >= maxRetries) {
+                        log.error("任务超时，未在规定时间内完成，taskId: {}", taskId);
+                        look.setLookUrl("超时");
+                        weLookService.updateWeLook(look);
+                    }
+                } else {
+                    log.error("执行任务失败，taskId: {}", taskId);
+                }
+            } else {
+                log.error("创建任务失败，look ID: {}", look.getId());
+            }
+        } catch (Exception e) {
+            log.error("处理look ID {} 时出错", look.getId(), e);
+            try {
+                look.setLookUrl("异常");
+                weLookService.updateWeLook(look);
+            } catch (Exception updateException) {
+                log.error("更新look异常状态失败，look ID: {}", look.getId(), updateException);
+            }
+        }
     }
 
     /**
