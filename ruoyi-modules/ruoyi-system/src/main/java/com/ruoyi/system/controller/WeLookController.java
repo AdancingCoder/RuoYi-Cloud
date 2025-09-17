@@ -217,7 +217,7 @@ public class WeLookController extends BaseController
                             // 3. 轮询任务状态直到完成
                             String status = "Pending";
                             int retryCount = 0;
-                            int maxRetries = 30; // 最多尝试30次，即150秒(2.5分钟)
+                            int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
 
                             while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
                                 Thread.sleep(5000); // 每5秒查询一次
@@ -303,8 +303,8 @@ public class WeLookController extends BaseController
                         log.info("创建AI图片任务成功，taskId: {}", taskId);
 
                         // 2. 执行AI图片任务
-                        //定义prompt,值为 back.getPromot() + look.getType()对应的提示词
-                        String executionId = WeshopUtils.executeAiImageTask(taskId, WeshopUtils.generatePromptByType(look.getType(), back.getPromot()));
+                        //定义prompt,值为 back.getPromot()+ look.getRemark + look.getType()对应的提示词
+                        String executionId = WeshopUtils.executeAiImageTask(taskId, WeshopUtils.generatePromptByType(look.getType(), back.getPromot() + look.getRemark()));
                         if (executionId != null) {
                             log.info("执行AI图片任务成功，executionId: {}", executionId);
 
