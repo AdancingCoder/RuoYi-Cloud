@@ -51,14 +51,14 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="模特ID" prop="modelWeId">
+<!--      <el-form-item label="模特ID" prop="modelWeId">
         <el-input
           v-model="queryParams.modelWeId"
           placeholder="请输入模特ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item label="关联we_back表的主键" prop="backId">
         <el-input
           v-model="queryParams.backId"
@@ -67,14 +67,14 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="背景ID" prop="backWeId">
+<!--      <el-form-item label="背景ID" prop="backWeId">
         <el-input
           v-model="queryParams.backWeId"
           placeholder="请输入背景ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item label="关联we_cloth表的主键" prop="clothId">
         <el-input
           v-model="queryParams.clothId"
@@ -190,7 +190,7 @@
         </template>
       </el-table-column>
       <el-table-column label="关联we_model表的主键" align="center" prop="modelId" />
-      <el-table-column label="模特ID" align="center" prop="modelWeId" />
+<!--      <el-table-column label="模特ID" align="center" prop="modelWeId" />-->
       <el-table-column label="模特文件URL" align="center" prop="modelUrl">
         <template slot-scope="scope">
           <el-image
@@ -203,7 +203,7 @@
         </template>
       </el-table-column>
       <el-table-column label="关联we_back表的主键" align="center" prop="backId" />
-      <el-table-column label="背景ID" align="center" prop="backWeId" />
+<!--      <el-table-column label="背景ID" align="center" prop="backWeId" />-->
       <el-table-column label="背景图片URL" align="center" prop="backUrl">
         <template slot-scope="scope">
           <el-image

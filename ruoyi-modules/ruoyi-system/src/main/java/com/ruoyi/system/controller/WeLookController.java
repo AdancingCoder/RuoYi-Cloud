@@ -1,6 +1,11 @@
 package com.ruoyi.system.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +31,6 @@ import com.ruoyi.system.service.IWeLookService;
 import com.ruoyi.system.service.IWeAiPictureService;
 import com.ruoyi.system.domain.WeAiPicture;
 import com.ruoyi.common.core.utils.WeshopUtils;
-import java.util.ArrayList;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
@@ -143,34 +147,55 @@ public class WeLookController extends BaseController
         // 查询所有背景数据
         List<WeBack> backList = weBackService.selectWeBackList(new WeBack());
 
-        // 组合生成外观数据
-        int count = 0;
-        for (WeCloth cloth : clothList) {
-            for (WeModel model : modelList) {
-                for (WeBack back : backList) {
-                    // 检查是否已存在相同组合的外观数据
-                    WeLook checkLook = new WeLook();
-                    checkLook.setClothId(cloth.getId());
-                    checkLook.setModelId(model.getId());
-                    checkLook.setBackId(back.getId());
+        // 按type分组数据，便于按type维度组合
+        Map<String, List<WeCloth>> clothGroupByType = clothList.stream().collect(Collectors.groupingBy(WeCloth::getType));
+        Map<String, List<WeModel>> modelGroupByType = modelList.stream().collect(Collectors.groupingBy(WeModel::getType));
+        Map<String, List<WeBack>> backGroupByType = backList.stream().collect(Collectors.groupingBy(WeBack::getType));
 
-                    // 如果不存在相同组合，则创建新的外观数据
-                    if (weLookService.selectWeLookList(checkLook).isEmpty()) {
-                        WeLook look = new WeLook();
-                        look.setClothId(cloth.getId());
-                        look.setClothUrl(cloth.getClothUrl());
-                        look.setModelId(model.getId());
-                        look.setModelWeId(model.getModelWeId());
-                        look.setModelUrl(model.getModelUrl());
-                        look.setBackId(back.getId());
-                        look.setBackWeId(back.getBackWeId());
-                        look.setBackUrl(back.getBackUrl());
-                        // 设置默认名称为"服装+模特+背景"组合
-                        look.setName(cloth.getType() + "+" + cloth.getName() + "+" + model.getName() + "+" + back.getName());
-                        // 设置外观类型与服装类型一致
-                        look.setType(cloth.getType());
-                        weLookService.insertWeLook(look);
-                        count++;
+        // 组合生成外观数据，仅组合相同type的数据
+        int count = 0;
+        // 获取所有存在的type
+        Set<String> allTypes = new HashSet<>();
+        allTypes.addAll(clothGroupByType.keySet());
+        allTypes.addAll(modelGroupByType.keySet());
+        allTypes.addAll(backGroupByType.keySet());
+
+        // 遍历每个type，只组合该type下的服装、模特和背景
+        for (String type : allTypes) {
+            List<WeCloth> clothOfType = clothGroupByType.getOrDefault(type, new ArrayList<>());
+            List<WeModel> modelOfType = modelGroupByType.getOrDefault(type, new ArrayList<>());
+            List<WeBack> backOfType = backGroupByType.getOrDefault(type, new ArrayList<>());
+
+            // 只有当三种数据都存在时才进行组合
+            if (!clothOfType.isEmpty() && !modelOfType.isEmpty() && !backOfType.isEmpty()) {
+                for (WeCloth cloth : clothOfType) {
+                    for (WeModel model : modelOfType) {
+                        for (WeBack back : backOfType) {
+                            // 检查是否已存在相同组合的外观数据
+                            WeLook checkLook = new WeLook();
+                            checkLook.setClothId(cloth.getId());
+                            checkLook.setModelId(model.getId());
+                            checkLook.setBackId(back.getId());
+
+                            // 如果不存在相同组合，则创建新的外观数据
+                            if (weLookService.selectWeLookList(checkLook).isEmpty()) {
+                                WeLook look = new WeLook();
+                                look.setClothId(cloth.getId());
+                                look.setClothUrl(cloth.getClothUrl());
+                                look.setModelId(model.getId());
+                                look.setModelWeId(model.getModelWeId());
+                                look.setModelUrl(model.getModelUrl());
+                                look.setBackId(back.getId());
+                                look.setBackWeId(back.getBackWeId());
+                                look.setBackUrl(back.getBackUrl());
+                                // 设置默认名称为"服装+模特+背景"组合
+                                look.setName(cloth.getType() + "+" + cloth.getName() + "+" + model.getName() + "+" + back.getName());
+                                // 设置外观类型与服装类型一致
+                                look.setType(cloth.getType());
+                                weLookService.insertWeLook(look);
+                                count++;
+                            }
+                        }
                     }
                 }
             }
