@@ -16,6 +16,7 @@ public class WeLook extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 主键 */
+    @Excel(name = "id")
     private Long id;
 
     /** 外观名称 */
@@ -27,11 +28,11 @@ public class WeLook extends BaseEntity
     private String lookUrl;
 
     /** 任务ID */
-    @Excel(name = "任务ID")
+    //@Excel(name = "任务ID")
     private String taskId;
 
     /** 执行ID */
-    @Excel(name = "执行ID")
+    //@Excel(name = "执行ID")
     private String executeId;
 
     /** 外观类型 */
@@ -43,23 +44,23 @@ public class WeLook extends BaseEntity
     private Long modelId;
 
     /** 模特ID */
-    @Excel(name = "模特ID")
+    //@Excel(name = "模特ID")
     private String modelWeId;
 
     /** 模特文件URL */
-    @Excel(name = "模特文件URL")
+    //@Excel(name = "模特文件URL")
     private String modelUrl;
 
     /** 关联we_back表的主键 */
-    @Excel(name = "关联we_back表的主键")
+    //@Excel(name = "关联we_back表的主键")
     private Long backId;
 
     /** 背景ID */
-    @Excel(name = "背景ID")
+    //@Excel(name = "背景ID")
     private String backWeId;
 
     /** 背景图片URL */
-    @Excel(name = "背景图片URL")
+    //@Excel(name = "背景图片URL")
     private String backUrl;
 
     /** 关联we_cloth表的主键 */
@@ -67,7 +68,7 @@ public class WeLook extends BaseEntity
     private Long clothId;
 
     /** 服装图片URL */
-    @Excel(name = "服装图片URL")
+    //@Excel(name = "服装图片URL")
     private String clothUrl;
 
     /** 删除标志（0代表存在 2代表删除） */
