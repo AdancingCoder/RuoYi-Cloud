@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import java.io.File;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.security.annotation.RequiresPermissions;
@@ -40,6 +43,7 @@ import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.alibaba.fastjson2.JSONObject;
 
 /**
  * 外观Controller
@@ -429,5 +433,149 @@ public class WeLookController extends BaseController
         //}).start();
 
         return AjaxResult.success("AI图片生成任务已提交，正在后台处理");
+    }
+
+    /**
+     * 自动AI图片生成
+     */
+    @Log(title = "外观", businessType = BusinessType.INSERT)
+    @PostMapping("/autoGenerateAiImage")
+    public AjaxResult autoGenerateAiImage(
+            @RequestParam("lookFile") MultipartFile lookFile,
+            @RequestParam("modelFile") MultipartFile modelFile,
+            @RequestParam("backgroundFile") MultipartFile backgroundFile) {
+        try {
+            log.info("开始自动AI图片生成");
+
+            // 检查文件是否为空
+            if (lookFile.isEmpty() || modelFile.isEmpty() || backgroundFile.isEmpty()) {
+                return AjaxResult.error("上传文件不能为空");
+            }
+
+            // 检查文件大小(限制为10MB)
+            long maxFileSize = 10 * 1024 * 1024; // 10MB
+            if (lookFile.getSize() > maxFileSize || modelFile.getSize() > maxFileSize || backgroundFile.getSize() > maxFileSize) {
+                return AjaxResult.error("文件大小不能超过10MB");
+            }
+
+            // 1. 上传模特图片处理逻辑
+            // 保存上传的文件到临时目录
+            File tempModelFile = File.createTempFile("model_", ".png");
+            modelFile.transferTo(tempModelFile);
+
+            // 上传模特图片到Weshop
+            String modelImageUrl = WeshopUtils.uploadImage(tempModelFile);
+            if (modelImageUrl == null) {
+                return AjaxResult.error("上传模特图片失败");
+            }
+
+            // 创建时尚模型
+            // 查询we_model表主键最大值加1作为name
+            Long maxModelId = weModelService.selectWeModelMaxId();
+            String modelName = String.valueOf(maxModelId != null ? maxModelId + 1 : 1);
+            String fashionModelId = WeshopUtils.createFashionModel(modelImageUrl, modelName);
+            if (fashionModelId == null) {
+                return AjaxResult.error("创建时尚模型失败");
+            }
+
+            // 查询时尚模型信息
+/*            JSONObject fashionModelData = WeshopUtils.queryFashionModel(fashionModelId);
+            if (fashionModelData == null) {
+                return AjaxResult.error("查询时尚模型失败");
+            }*/
+
+            // 保存模特数据到we_model表
+            WeModel model = new WeModel();
+            model.setName(modelName);
+            model.setModelUrl(modelImageUrl);
+            model.setModelWeId(fashionModelId);
+            model.setType("3"); // 设置type为3
+            weModelService.insertWeModel(model);
+
+            // 2. 上传背景图片处理逻辑
+            // 保存上传的文件到临时目录
+            File tempBackgroundFile = File.createTempFile("background_", ".png");
+            backgroundFile.transferTo(tempBackgroundFile);
+
+            // 上传背景图片到Weshop
+            String backgroundImageUrl = WeshopUtils.uploadImage(tempBackgroundFile);
+            if (backgroundImageUrl == null) {
+                return AjaxResult.error("上传背景图片失败");
+            }
+
+            // 创建背景位置
+            // 查询we_back表主键最大值加1作为name
+            Long maxBackId = weBackService.selectWeBackMaxId();
+            String backName = String.valueOf(maxBackId != null ? maxBackId + 1 : 1);
+            String locationId = WeshopUtils.createLocation(backgroundImageUrl, backName);
+            if (locationId == null) {
+                return AjaxResult.error("创建背景位置失败");
+            }
+
+            // 查询背景位置信息
+/*            JSONObject locationData = WeshopUtils.queryLocation(locationId);
+            if (locationData == null) {
+                return AjaxResult.error("查询背景位置失败");
+            }*/
+
+            // 保存背景数据到we_back表
+            WeBack back = new WeBack();
+            back.setName(backName);
+            back.setBackUrl(backgroundImageUrl);
+            back.setBackWeId(locationId);
+            back.setType("3"); // 设置type为3
+            weBackService.insertWeBack(back);
+
+            // 3. 上传look图片处理逻辑
+            // 保存上传的文件到临时目录
+            File tempLookFile = File.createTempFile("look_", ".png");
+            lookFile.transferTo(tempLookFile);
+
+            // 保存look数据到we_cloth表
+            // 查询we_cloth表主键最大值加1作为name和cloth_url
+            Long maxClothId = weClothService.selectWeClothMaxId();
+            String clothName = String.valueOf(maxClothId != null ? maxClothId + 1 : 1);
+            WeCloth cloth = new WeCloth();
+            cloth.setName(clothName);
+            cloth.setClothUrl(clothName); // 这里使用name作为cloth_url，实际应用中替换为 ali oss
+            cloth.setType("3"); // 设置type为3
+            weClothService.insertWeCloth(cloth);
+
+            // 4. 生成we_look数据
+            // 检查是否已存在相同组合的外观数据
+            WeLook checkLook = new WeLook();
+            checkLook.setClothId(cloth.getId());
+            checkLook.setModelId(model.getId());
+            checkLook.setBackId(back.getId());
+
+            // 如果不存在相同组合，则创建新的外观数据
+            if (weLookService.selectWeLookList(checkLook).isEmpty()) {
+                WeLook weLook = new WeLook(); // 修复变量名冲突
+                weLook.setClothId(cloth.getId());
+                weLook.setClothUrl(cloth.getClothUrl());
+                weLook.setModelId(model.getId());
+                weLook.setModelWeId(model.getModelWeId());
+                weLook.setModelUrl(model.getModelUrl());
+                weLook.setBackId(back.getId());
+                weLook.setBackWeId(back.getBackWeId());
+                weLook.setBackUrl(back.getBackUrl());
+                // 设置默认名称为"服装+模特+背景"组合
+                weLook.setName(cloth.getType() + "+" + cloth.getName() + "+" + model.getName() + "+" + back.getName());
+                // 设置外观类型与服装类型一致
+                weLook.setType(cloth.getType());
+                weLookService.insertWeLook(weLook);
+
+            }
+
+            // 删除临时文件
+            tempModelFile.delete();
+            tempBackgroundFile.delete();
+            tempLookFile.delete();
+
+            return AjaxResult.success("自动生成成功");
+        } catch (Exception e) {
+            log.error("自动生成AI图片失败", e);
+            return AjaxResult.error("自动生成失败: " + e.getMessage());
+        }
     }
 }

@@ -105,4 +105,15 @@ public class WeModelServiceImpl implements IWeModelService
     {
         return weModelMapper.deleteWeModelById(id);
     }
+    
+    /**
+     * 查询模特表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    @Override
+    public Long selectWeModelMaxId()
+    {
+        return weModelMapper.selectWeModelMaxId();
+    }
 }

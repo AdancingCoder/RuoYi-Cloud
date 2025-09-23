@@ -105,4 +105,15 @@ public class WeBackServiceImpl implements IWeBackService
     {
         return weBackMapper.deleteWeBackById(id);
     }
+    
+    /**
+     * 查询背景表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    @Override
+    public Long selectWeBackMaxId()
+    {
+        return weBackMapper.selectWeBackMaxId();
+    }
 }

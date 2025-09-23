@@ -66,4 +66,11 @@ public interface IWeBackService
      * @return 结果
      */
     public int deleteWeBackById(Long id);
+    
+    /**
+     * 查询背景表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    public Long selectWeBackMaxId();
 }

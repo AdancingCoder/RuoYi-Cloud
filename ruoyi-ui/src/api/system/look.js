@@ -68,3 +68,15 @@ export function generateAiImage(data) {
     data: data
   })
 }
+
+// 自动AI图片生成
+export function autoGenerateAiImage(data) {
+  return request({
+    url: '/system/look/autoGenerateAiImage',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

@@ -42,6 +42,10 @@
         <include refid="selectWeModelVo"/>
         where model_we_id = #{modelWeId}
     </select>
+    
+    <select id="selectWeModelMaxId" resultType="Long">
+        select max(id) from we_model
+    </select>
 
     <insert id="insertWeModel" parameterType="WeModel" useGeneratedKeys="true" keyProperty="id">
         insert into we_model
