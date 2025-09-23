@@ -12,6 +12,11 @@ import java.util.stream.Collectors;
 import java.io.IOException;
 import java.io.File;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.system.api.RemoteFileService;
+import com.ruoyi.system.api.domain.SysFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +75,9 @@ public class WeLookController extends BaseController
 
     @Autowired
     private IWeAiPictureService weAiPictureService;
+
+    @Autowired
+    private RemoteFileService remoteFileService;
 
     /**
      * 查询外观列表
@@ -555,7 +563,14 @@ public class WeLookController extends BaseController
             String clothName = String.valueOf(maxClothId != null ? maxClothId + 1 : 1);
             WeCloth cloth = new WeCloth();
             cloth.setName(clothName);
-            cloth.setClothUrl(uploadFile(tempLookFile)); // 这里使用name作为cloth_url，实际应用中替换为 ali oss
+
+            R<SysFile> fileResult = remoteFileService.upload(lookFile);
+            if (StringUtils.isNull(fileResult) || StringUtils.isNull(fileResult.getData()))
+            {
+                return error("文件服务异常，请联系管理员");
+            }
+            String url = fileResult.getData().getUrl();
+            cloth.setClothUrl(url);
             cloth.setType("3"); // 设置type为3
             weClothService.insertWeCloth(cloth);
 
