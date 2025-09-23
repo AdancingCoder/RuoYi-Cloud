@@ -472,6 +472,11 @@ public class WeLookController extends BaseController
             @RequestParam("backgroundFile") MultipartFile backgroundFile) {
         try {
             log.info("开始自动AI图片生成");
+            R<SysFile> fileResult = remoteFileService.upload(lookFile);
+            if (StringUtils.isNull(fileResult) || StringUtils.isNull(fileResult.getData()))
+            {
+                return error("文件服务异常，请联系管理员");
+            }
 
             // 检查文件是否为空
             if (lookFile.isEmpty() || modelFile.isEmpty() || backgroundFile.isEmpty()) {
@@ -564,11 +569,7 @@ public class WeLookController extends BaseController
             WeCloth cloth = new WeCloth();
             cloth.setName(clothName);
 
-            R<SysFile> fileResult = remoteFileService.upload(lookFile);
-            if (StringUtils.isNull(fileResult) || StringUtils.isNull(fileResult.getData()))
-            {
-                return error("文件服务异常，请联系管理员");
-            }
+
             String url = fileResult.getData().getUrl();
             cloth.setClothUrl(url);
             cloth.setType("3"); // 设置type为3
