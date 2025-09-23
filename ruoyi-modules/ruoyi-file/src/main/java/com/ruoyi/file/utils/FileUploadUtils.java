@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.UUID;
+
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.core.exception.file.FileException;
@@ -181,5 +183,14 @@ public class FileUploadUtils
             }
         }
         return false;
+    }
+    /**
+     * 以UUID重命名
+     * @param fileName 文件名称
+     * @return 格式化名称
+     */
+    public static String rename(String fileName) {
+        String extName = fileName.substring(fileName.lastIndexOf("."));
+        return UUID.randomUUID().toString().replace("-", "") + extName;
     }
 }

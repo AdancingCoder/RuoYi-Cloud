@@ -66,4 +66,12 @@ public interface IWeBackService
      * @return 结果
      */
     public int deleteWeBackById(Long id);
+
+    /**
+     * get promot
+     *
+     * @param filesUrl files url
+     * @return {@link String }
+     */
+    public String getPromot(String filesUrl);
 }

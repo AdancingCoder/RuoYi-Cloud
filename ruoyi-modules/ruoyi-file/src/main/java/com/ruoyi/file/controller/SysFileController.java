@@ -1,9 +1,11 @@
 package com.ruoyi.file.controller;
 
+import com.ruoyi.file.service.AliOssFileServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,8 @@ public class SysFileController
 
     @Autowired
     private ISysFileService sysFileService;
+    @Autowired
+    private AliOssFileServiceImpl aliOssFileService;
 
     /**
      * 文件上传请求
@@ -43,6 +47,35 @@ public class SysFileController
         }
         catch (Exception e)
         {
+            log.error("上传文件失败", e);
+            return R.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * upload by type
+     *
+     * @param type type
+     * @param file file
+     * @return {@link R }<{@link SysFile }>
+     */
+    @PostMapping("upload/{type}")
+    public R<SysFile> uploadByType(@PathVariable(value = "type") String type, MultipartFile file) {
+        String url;
+        try {
+            switch (type){
+                case "ali":
+                    url = aliOssFileService.uploadFile(file);
+                    break;
+                default:
+                    url = sysFileService.uploadFile(file);
+                    break;
+            }
+            SysFile sysFile = new SysFile();
+            sysFile.setName(FileUtils.getName(url));
+            sysFile.setUrl(url);
+            return R.ok(sysFile);
+        }catch (Exception e) {
             log.error("上传文件失败", e);
             return R.fail(e.getMessage());
         }

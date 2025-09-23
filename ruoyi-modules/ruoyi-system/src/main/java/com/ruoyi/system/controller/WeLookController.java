@@ -40,6 +40,7 @@ import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 外观Controller
@@ -246,6 +247,24 @@ public class WeLookController extends BaseController
 
         return AjaxResult.success("任务已提交，正在后台处理");
     }
+
+
+    /**
+     * 生成looks
+     */
+//    @RequiresPermissions("system:look:add")
+//    @Log(title = "外观", businessType = BusinessType.UPDATE)
+    @PostMapping("/generateLooks/{type}")
+    public AjaxResult upLoad(@PathVariable(value = "type") String type, MultipartFile file) {
+
+
+
+        return AjaxResult.success("任务已提交，正在后台处理");
+    }
+
+
+
+
 
     /**
      * 处理单个look的生成任务
