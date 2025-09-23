@@ -5,23 +5,23 @@ import com.ruoyi.system.domain.WeBack;
 
 /**
  * 背景Service接口
- * 
+ *
  * @author ruoyi
  * @date 2025-09-14
  */
-public interface IWeBackService 
+public interface IWeBackService
 {
     /**
      * 查询背景
-     * 
+     *
      * @param id 背景主键
      * @return 背景
      */
     public WeBack selectWeBackById(Long id);
-    
+
     /**
      * 根据外部ID查询背景
-     * 
+     *
      * @param backWeId 背景外部ID
      * @return 背景
      */
@@ -29,7 +29,7 @@ public interface IWeBackService
 
     /**
      * 查询背景列表
-     * 
+     *
      * @param weBack 背景
      * @return 背景集合
      */
@@ -37,7 +37,7 @@ public interface IWeBackService
 
     /**
      * 新增背景
-     * 
+     *
      * @param weBack 背景
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IWeBackService
 
     /**
      * 修改背景
-     * 
+     *
      * @param weBack 背景
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IWeBackService
 
     /**
      * 批量删除背景
-     * 
+     *
      * @param ids 需要删除的背景主键集合
      * @return 结果
      */
@@ -61,7 +61,7 @@ public interface IWeBackService
 
     /**
      * 删除背景信息
-     * 
+     *
      * @param id 背景主键
      * @return 结果
      */
@@ -74,4 +74,11 @@ public interface IWeBackService
      * @return {@link String }
      */
     public String getPromot(String filesUrl);
+
+    /**
+     * 查询背景表主键最大值
+     *
+     * @return 主键最大值
+     */
+    public Long selectWeBackMaxId();
 }
