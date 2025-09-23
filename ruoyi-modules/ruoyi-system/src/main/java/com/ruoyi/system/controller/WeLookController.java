@@ -43,6 +43,7 @@ import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static com.ruoyi.common.core.utils.HttpUtils.uploadFile;
 
 /**
  * 外观Controller
@@ -554,7 +555,7 @@ public class WeLookController extends BaseController
             String clothName = String.valueOf(maxClothId != null ? maxClothId + 1 : 1);
             WeCloth cloth = new WeCloth();
             cloth.setName(clothName);
-            cloth.setClothUrl(clothName); // 这里使用name作为cloth_url，实际应用中替换为 ali oss
+            cloth.setClothUrl(uploadFile(tempLookFile)); // 这里使用name作为cloth_url，实际应用中替换为 ali oss
             cloth.setType("3"); // 设置type为3
             weClothService.insertWeCloth(cloth);
 

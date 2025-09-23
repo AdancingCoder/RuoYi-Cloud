@@ -1,16 +1,21 @@
 package com.ruoyi.common.core.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.net.ssl.HttpsURLConnection;
@@ -248,5 +253,42 @@ public class HttpUtils {
      */
     public static String sendPost(String url, String param) {
         return sendPost(url, param, null);
+    }
+
+    public static String uploadFile(File file) throws IOException {
+
+        // 创建 HttpClient
+        CloseableHttpClient client = HttpClients.createDefault();
+
+        // 创建 HttpPost 请求
+        HttpPost post = new HttpPost("http://localhost:9300/upload");
+
+        // 构造 multipart/form-data 请求体
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.addBinaryBody("file", new FileInputStream(file), ContentType.APPLICATION_OCTET_STREAM, file.getName());
+
+        org.apache.http.HttpEntity multipart = builder.build();
+        post.setEntity(multipart);
+
+        // 发送请求
+        String responseBody = null;
+        try (CloseableHttpResponse response = client.execute(post)) {
+            // 处理响应
+
+            if (response.getStatusLine().getStatusCode() == 200) {
+                // 获取响应实体
+                org.apache.http.HttpEntity responseEntity = response.getEntity();
+                if (responseEntity != null) {
+                    // 将响应体转换为字符串
+                    responseBody = EntityUtils.toString(responseEntity);
+                    return JSON.parseObject(responseBody).getJSONObject("data").get("url").toString();
+                }
+            } else {
+                System.out.println("文件上传失败，状态码: " + response.getStatusLine().getStatusCode());
+            }
+        } finally {
+            client.close();
+        }
+        return null;
     }
 }
