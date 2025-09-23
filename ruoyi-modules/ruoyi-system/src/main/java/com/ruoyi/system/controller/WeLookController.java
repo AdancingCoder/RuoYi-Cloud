@@ -174,7 +174,7 @@ public class WeLookController extends BaseController
         allTypes.addAll(clothGroupByType.keySet());
         allTypes.addAll(modelGroupByType.keySet());
         allTypes.addAll(backGroupByType.keySet());
-
+        allTypes.remove("3");
         // 遍历每个type，只组合该type下的服装、模特和背景
         for (String type : allTypes) {
             List<WeCloth> clothOfType = clothGroupByType.getOrDefault(type, new ArrayList<>());
@@ -584,23 +584,194 @@ public class WeLookController extends BaseController
 
             // 如果不存在相同组合，则创建新的外观数据
             if (weLookService.selectWeLookList(checkLook).isEmpty()) {
-                WeLook weLook = new WeLook(); // 修复变量名冲突
-                weLook.setClothId(cloth.getId());
-                weLook.setClothUrl(cloth.getClothUrl());
-                weLook.setModelId(model.getId());
-                weLook.setModelWeId(model.getModelWeId());
-                weLook.setModelUrl(model.getModelUrl());
-                weLook.setBackId(back.getId());
-                weLook.setBackWeId(back.getBackWeId());
-                weLook.setBackUrl(back.getBackUrl());
+                WeLook look = new WeLook(); // 修复变量名冲突
+                look.setClothId(cloth.getId());
+                look.setClothUrl(cloth.getClothUrl());
+                look.setModelId(model.getId());
+                look.setModelWeId(model.getModelWeId());
+                look.setModelUrl(model.getModelUrl());
+                look.setBackId(back.getId());
+                look.setBackWeId(back.getBackWeId());
+                look.setBackUrl(back.getBackUrl());
                 // 设置默认名称为"服装+模特+背景"组合
-                weLook.setName(cloth.getType() + "+" + cloth.getName() + "+" + model.getName() + "+" + back.getName());
+                look.setName(cloth.getType() + "+" + cloth.getName() + "+" + model.getName() + "+" + back.getName());
                 // 设置外观类型与服装类型一致
-                weLook.setType(cloth.getType());
-                weLookService.insertWeLook(weLook);
+                look.setType(cloth.getType());
+                weLookService.insertWeLook(look);
+
+                //结合227-260行generateLooks方法，更新look数据的lookUrl
+                // 参考processLook方法实现lookUrl的生成逻辑
+                try {
+                    log.info("开始处理look ID: {}, name: {}", look.getId(), look.getName());
+
+                    // 1. 创建任务
+                    String taskId = WeshopUtils.createTask(look.getName(), look.getClothUrl());
+                    if (taskId != null) {
+                        log.info("创建任务成功，taskId: {}", taskId);
+                        // 更新任务ID
+                        look.setTaskId(taskId);
+                        weLookService.updateWeLook(look);
+
+                        // 2. 执行任务
+                        String executionId = WeshopUtils.executeTask(taskId, look.getModelWeId(), look.getBackWeId());
+                        if (executionId != null) {
+                            log.info("执行任务成功，executionId: {}", executionId);
+                            // 更新执行ID
+                            look.setExecuteId(executionId);
+                            weLookService.updateWeLook(look);
+
+                            // 3. 轮询任务状态直到完成
+                            String status = "Pending";
+                            int retryCount = 0;
+                            int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
+
+                            while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
+                                Thread.sleep(5000); // 每5秒查询一次
+                                retryCount++;
+                                log.info("第{}次轮询任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
+
+                                WeshopUtils.TaskResult result = WeshopUtils.queryTask(taskId, executionId);
+                                if (result != null) {
+                                    status = result.getStatus();
+                                    log.info("任务状态: {}", status);
+
+                                    // 如果任务成功完成，更新look_url
+                                    if ("Success".equals(status)) {
+                                        look.setLookUrl(result.getImageUrl());
+                                        weLookService.updateWeLook(look);
+                                        log.info("任务成功完成，图片URL: {}", result.getImageUrl());
+                                    } else if ("Failed".equals(status)) {
+                                        look.setLookUrl("失败");
+                                        weLookService.updateWeLook(look);
+                                        log.info("任务执行失败");
+                                    }
+                                } else {
+                                    log.warn("查询任务返回空结果");
+                                }
+                            }
+
+                            if (retryCount >= maxRetries) {
+                                log.error("任务超时，未在规定时间内完成，taskId: {}", taskId);
+                                look.setLookUrl("超时");
+                                weLookService.updateWeLook(look);
+                            }
+                        } else {
+                            log.error("执行任务失败，taskId: {}", taskId);
+                            look.setLookUrl("执行失败");
+                            weLookService.updateWeLook(look);
+                        }
+                    } else {
+                        log.error("创建任务失败，look ID: {}", look.getId());
+                        look.setLookUrl("创建任务失败");
+                        weLookService.updateWeLook(look);
+                    }
+                } catch (Exception e) {
+                    log.error("处理look ID {} 时出错", look.getId(), e);
+                    try {
+                        look.setLookUrl("异常");
+                        weLookService.updateWeLook(look);
+                    } catch (Exception updateException) {
+                        log.error("更新look异常状态失败，look ID: {}", look.getId(), updateException);
+                    }
+                }
+                
+                //如果look的lookUrl不为空，则调用以下方法
+                if (look.getLookUrl() != null && !look.getLookUrl().isEmpty() && 
+                    !"失败".equals(look.getLookUrl()) && 
+                    !"超时".equals(look.getLookUrl()) && 
+                    !"执行失败".equals(look.getLookUrl()) && 
+                    !"创建任务失败".equals(look.getLookUrl()) && 
+                    !"异常".equals(look.getLookUrl())) {
+                    
+                    // 类似generateAiImage方法的处理逻辑
+                    try {
+                        log.info("开始处理AI图片生成，look ID: {}, name: {}", look.getId(), look.getName());
+
+                        // 获取背景信息（包含提示词）
+                        WeBack backInfo = weBackService.selectWeBackById(look.getBackId());
+                        if (backInfo == null) {
+                            log.error("未找到背景信息，look ID: {}", look.getId());
+                        } else {
+                            // 创建AI图片任务
+                            String taskId = WeshopUtils.createAiImageTask(look.getName(), look.getLookUrl());
+                            if (taskId != null) {
+                                log.info("创建AI图片任务成功，taskId: {}", taskId);
+
+                                // 执行AI图片任务
+                                String executionId = WeshopUtils.executeAiImageTask(taskId, WeshopUtils.generatePromptByType(look.getType(), backInfo.getPromot() + look.getRemark()));
+                                if (executionId != null) {
+                                    log.info("执行AI图片任务成功，executionId: {}", executionId);
+
+                                    // 轮询任务状态直到完成
+                                    String status = "Pending";
+                                    int retryCount = 0;
+                                    int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
+
+                                    while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
+                                        Thread.sleep(5000); // 每5秒查询一次
+                                        retryCount++;
+                                        log.info("第{}次轮询AI图片任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
+
+                                        WeshopUtils.AiImageTaskResult result = WeshopUtils.queryAiImageTask(taskId, executionId);
+                                        if (result != null) {
+                                            status = result.getStatus();
+                                            log.info("AI图片任务状态: {}", status);
+
+                                            // 如果任务成功完成，保存AI图片
+                                            if ("Success".equals(status)) {
+                                                List<String> imageUrls = result.getImageUrls();
+                                                log.info("AI图片任务成功完成，共生成 {} 张图片", imageUrls.size());
+
+                                                // 为每张图片创建WeAiPicture记录
+                                                for (String imageUrl : imageUrls) {
+                                                    WeAiPicture aiPicture = new WeAiPicture();
+                                                    aiPicture.setName(look.getName());
+                                                    aiPicture.setType(look.getType());
+                                                    aiPicture.setLookId(look.getId());
+                                                    aiPicture.setLookUrl(look.getLookUrl());
+                                                    aiPicture.setTaskId(taskId);
+                                                    aiPicture.setExecuteId(executionId);
+                                                    aiPicture.setAiUrl(imageUrl);
+                                                    weAiPictureService.insertWeAiPicture(aiPicture);
+                                                }
+                                                log.info("AI图片记录保存完成");
+                                            } else if ("Failed".equals(status)) {
+                                                log.info("AI图片任务执行失败，错误信息: {}", result.getError());
+
+                                                // 保存错误信息
+                                                WeAiPicture aiPicture = new WeAiPicture();
+                                                aiPicture.setName(look.getName());
+                                                aiPicture.setType(look.getType());
+                                                aiPicture.setLookId(look.getId());
+                                                aiPicture.setLookUrl(look.getLookUrl());
+                                                aiPicture.setTaskId(taskId);
+                                                aiPicture.setExecuteId(executionId);
+                                                aiPicture.setAiUrl("错误: " + result.getError());
+                                                weAiPictureService.insertWeAiPicture(aiPicture);
+                                            }
+                                        } else {
+                                            log.warn("查询AI图片任务返回空结果");
+                                        }
+                                    }
+
+                                    if (retryCount >= maxRetries) {
+                                        log.error("AI图片任务超时，未在规定时间内完成，taskId: {}", taskId);
+                                    }
+                                } else {
+                                    log.error("执行AI图片任务失败，taskId: {}", taskId);
+                                }
+                            } else {
+                                log.error("创建AI图片任务失败，look ID: {}", look.getId());
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("处理AI图片生成时出错，look ID: {}", look.getId(), e);
+                    }
+                } else {
+                    log.info("lookUrl为空或生成失败，跳过AI图片生成步骤，look ID: {}", look.getId());
+                }
 
             }
-
             // 删除临时文件
             tempModelFile.delete();
             tempBackgroundFile.delete();
