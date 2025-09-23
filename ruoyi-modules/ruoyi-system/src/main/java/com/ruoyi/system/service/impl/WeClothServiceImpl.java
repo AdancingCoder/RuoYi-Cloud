@@ -93,4 +93,15 @@ public class WeClothServiceImpl implements IWeClothService
     {
         return weClothMapper.deleteWeClothById(id);
     }
+    
+    /**
+     * 查询服装表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    @Override
+    public Long selectWeClothMaxId()
+    {
+        return weClothMapper.selectWeClothMaxId();
+    }
 }

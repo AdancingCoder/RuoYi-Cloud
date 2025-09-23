@@ -44,6 +44,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectWeBackVo"/>
         where back_we_id = #{backWeId}
     </select>
+    
+    <select id="selectWeBackMaxId" resultType="Long">
+        select max(id) from we_back
+    </select>
 
     <insert id="insertWeBack" parameterType="WeBack" useGeneratedKeys="true" keyProperty="id">
         insert into we_back

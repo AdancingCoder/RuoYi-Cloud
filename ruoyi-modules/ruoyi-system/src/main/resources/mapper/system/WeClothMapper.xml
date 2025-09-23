@@ -35,6 +35,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectWeClothVo"/>
         where id = #{id}
     </select>
+    
+    <select id="selectWeClothMaxId" resultType="Long">
+        select max(id) from we_cloth
+    </select>
 
     <insert id="insertWeCloth" parameterType="WeCloth" useGeneratedKeys="true" keyProperty="id">
         insert into we_cloth

@@ -66,4 +66,11 @@ public interface IWeModelService
      * @return 结果
      */
     public int deleteWeModelById(Long id);
+    
+    /**
+     * 查询模特表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    public Long selectWeModelMaxId();
 }

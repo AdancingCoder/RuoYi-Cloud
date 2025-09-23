@@ -58,4 +58,11 @@ public interface IWeClothService
      * @return 结果
      */
     public int deleteWeClothById(Long id);
+    
+    /**
+     * 查询服装表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    public Long selectWeClothMaxId();
 }

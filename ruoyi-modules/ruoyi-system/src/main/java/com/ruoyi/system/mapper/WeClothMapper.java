@@ -58,4 +58,11 @@ public interface WeClothMapper
      * @return 结果
      */
     public int deleteWeClothByIds(Long[] ids);
+    
+    /**
+     * 查询服装表主键最大值
+     * 
+     * @return 主键最大值
+     */
+    public Long selectWeClothMaxId();
 }

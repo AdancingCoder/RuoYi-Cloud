@@ -22,20 +22,20 @@ import com.ruoyi.system.service.IWeBackService;
 
 /**
  * 背景Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2025-09-14
  */
 @Service
 @Slf4j
-public class WeBackServiceImpl implements IWeBackService 
+public class WeBackServiceImpl implements IWeBackService
 {
     @Autowired
     private WeBackMapper weBackMapper;
 
     /**
      * 查询背景
-     * 
+     *
      * @param id 背景主键
      * @return 背景
      */
@@ -44,10 +44,10 @@ public class WeBackServiceImpl implements IWeBackService
     {
         return weBackMapper.selectWeBackById(id);
     }
-    
+
     /**
      * 根据外部ID查询背景
-     * 
+     *
      * @param backWeId 背景外部ID
      * @return 背景
      */
@@ -59,7 +59,7 @@ public class WeBackServiceImpl implements IWeBackService
 
     /**
      * 查询背景列表
-     * 
+     *
      * @param weBack 背景
      * @return 背景
      */
@@ -71,7 +71,7 @@ public class WeBackServiceImpl implements IWeBackService
 
     /**
      * 新增背景
-     * 
+     *
      * @param weBack 背景
      * @return 结果
      */
@@ -84,7 +84,7 @@ public class WeBackServiceImpl implements IWeBackService
 
     /**
      * 修改背景
-     * 
+     *
      * @param weBack 背景
      * @return 结果
      */
@@ -97,7 +97,7 @@ public class WeBackServiceImpl implements IWeBackService
 
     /**
      * 批量删除背景
-     * 
+     *
      * @param ids 需要删除的背景主键
      * @return 结果
      */
@@ -109,7 +109,7 @@ public class WeBackServiceImpl implements IWeBackService
 
     /**
      * 删除背景信息
-     * 
+     *
      * @param id 背景主键
      * @return 结果
      */
@@ -152,4 +152,10 @@ public class WeBackServiceImpl implements IWeBackService
         return s;
 
     }
+
+    @Override
+    public Long selectWeBackMaxId() {
+        return weBackMapper.selectWeBackMaxId();
+    }
+
 }
