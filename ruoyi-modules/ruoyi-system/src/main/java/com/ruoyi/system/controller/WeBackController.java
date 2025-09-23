@@ -144,6 +144,13 @@ public class WeBackController extends BaseController
         }
     }
 
+//    @RequiresPermissions("system:back:generate")
+//    @Log(title = "背景", businessType = BusinessType.INSERT)
+    @PostMapping("/promot")
+    public AjaxResult getPromot(String fileUrl) {
+        return success(weBackService.getPromot(fileUrl));
+    }
+
     /**
      * 处理locations数据，生成背景信息
      */

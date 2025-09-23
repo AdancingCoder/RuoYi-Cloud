@@ -66,11 +66,12 @@ public interface IWeBackService
      * @return 结果
      */
     public int deleteWeBackById(Long id);
-    
+
     /**
-     * 查询背景表主键最大值
-     * 
-     * @return 主键最大值
+     * get promot
+     *
+     * @param filesUrl files url
+     * @return {@link String }
      */
-    public Long selectWeBackMaxId();
+    public String getPromot(String filesUrl);
 }
