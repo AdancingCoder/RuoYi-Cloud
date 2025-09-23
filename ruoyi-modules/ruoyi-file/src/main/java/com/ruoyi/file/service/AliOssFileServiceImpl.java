@@ -29,6 +29,7 @@ import java.util.UUID;
  * @date 2025/09/22
  */
 @Service
+@Primary
 @Slf4j
 public class AliOssFileServiceImpl implements ISysFileService {
     @Value("${aliyun.oss.endpoint}")
