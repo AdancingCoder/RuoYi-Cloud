@@ -1,5 +1,6 @@
 package com.ruoyi.common.core.utils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -18,6 +19,9 @@ public class WeshopUtils {
 
     // Weshop API基础URL
     private static final String BASE_URL = "https://openapi.weshop.com/openapi/v1/agent";
+    private static final String UPLOAD_MODEL_URL = "https://openapi.weshop.com/openapi/v1/agent/myFashionModel/create";
+    private static final String QUERY_MODEL_URL = "https://openapi.weshop.com/openapi/v1/agent/myFashionModel/query";
+    private static final String UPLOAD_LOCATION_URL = "https://openapi.weshop.com/openapi/v1/agent/myLocation/create";
 
     // 模拟Cookie，实际使用中应该从配置文件或安全存储中获取
     private static String COOKIE = "Bvrrnc4lOI6MgUiGQyxwuUCKc3uQCZT9";
@@ -343,6 +347,24 @@ public class WeshopUtils {
         }
     }
 
+    public static String uploadPic(String upLoadType,String picUrl){
+        String url="model".equals(upLoadType)?UPLOAD_MODEL_URL:UPLOAD_LOCATION_URL;
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("image", Arrays.asList(picUrl));
+        data.put("name",picUrl.substring(picUrl.lastIndexOf("/")+1,picUrl.lastIndexOf(".")));
+        data.put("agentName","aimodel");
+        data.put("agentVersion","v1.0");
+        String response = sendPostRequest(url,data);
+        log.info("上传图片任务请求参数: {}", JSON.toJSONString(data));
+        log.info("上传图片任务响应: {}", response);
+        JSONObject jsonObject = JSON.parseObject(response);
+        String fashionModelId = jsonObject.getJSONObject("data").get("fashionModelId").toString();
+
+        String getResponse = sendGetRequest(QUERY_MODEL_URL, "fashionModelId=" + fashionModelId);
+        JSONObject jsonObject1 = JSON.parseObject(getResponse);
+        return null;
+    }
+
     /**
      * 发送POST请求
      *
@@ -357,6 +379,20 @@ public class WeshopUtils {
         headers.put("Authorization", getCookie());
 
         return HttpUtils.sendPost(url, jsonData, headers);
+    }
+
+    /**
+     * send get request
+     *
+     * @param url   url
+     * @param param param
+     * @return {@link String }
+     */
+    private static String sendGetRequest(String url, String param) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", getCookie());
+
+        return HttpUtils.sendGet(url, param, headers);
     }
 
     /**
