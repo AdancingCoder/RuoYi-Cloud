@@ -28,7 +28,7 @@ public class WeshopUtils {
 
     // Weshop API基础URL
     private static final String BASE_URL = "https://openapi.weshop.com/openapi/v1";
-    
+
     // API密钥
     private static final String API_KEY = "Bvrrnc4lOI6MgUiGQyxwuUCKc3uQCZT9";
 
@@ -52,17 +52,17 @@ public class WeshopUtils {
         try {
             String boundary = "----" + System.currentTimeMillis();
             String urlStr = BASE_URL + "/asset/upload/image";
-            
+
             URL url = new URL(urlStr);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            
+
             // 设置请求属性
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setDoInput(true);
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
             connection.setRequestProperty("Authorization", getApiKey());
-            
+
             // 获取文件扩展名以确定Content-Type
             String fileName = imageFile.getName();
             String fileExtension = "jpeg"; // 默认
@@ -73,24 +73,24 @@ public class WeshopUtils {
             if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType) && !"image/gif".equals(contentType)) {
                 contentType = "image/jpeg"; // 默认
             }
-            
+
             // 准备请求体
             try (DataOutputStream dos = new DataOutputStream(connection.getOutputStream())) {
                 // 写入文件参数
                 dos.writeBytes("--" + boundary + "\r\n");
                 dos.writeBytes("Content-Disposition: form-data; name=\"image\"; filename=\"" + fileName + "\"\r\n");
                 dos.writeBytes("Content-Type: " + contentType + "\r\n\r\n");
-                
+
                 // 写入文件内容
                 byte[] fileBytes = Files.readAllBytes(imageFile.toPath());
                 dos.write(fileBytes);
                 dos.writeBytes("\r\n");
-                
+
                 // 结束边界
                 dos.writeBytes("--" + boundary + "--\r\n");
                 dos.flush();
             }
-            
+
             // 获取响应
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -101,10 +101,10 @@ public class WeshopUtils {
                         response.append(line);
                     }
                 }
-                
+
                 log.info("上传图片请求URL: {}", urlStr);
                 log.info("上传图片响应: {}", response.toString());
-                
+
                 // 解析响应
                 JSONObject jsonResponse = JSON.parseObject(response.toString());
                 if (jsonResponse != null && jsonResponse.getBoolean("success")) {
@@ -134,24 +134,24 @@ public class WeshopUtils {
     public static String createFashionModel(String imageUrl, String name) {
         try {
             String url = BASE_URL + "/agent/myFashionModel/create";
-            
+
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("images", new String[]{imageUrl});
             requestData.put("name", name);
             requestData.put("agentName", "aimodel");
             requestData.put("agentVersion", "v1.0");
-            
+
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", getApiKey());
             headers.put("Content-Type", "application/json");
-            
+
             String jsonData = JSON.toJSONString(requestData);
             String response = HttpUtils.sendPost(url, jsonData, headers);
-            
+
             log.info("创建时尚模型请求URL: {}", url);
             log.info("创建时尚模型请求参数: {}", jsonData);
             log.info("创建时尚模型响应: {}", response);
-            
+
             // 解析响应
             JSONObject jsonResponse = JSON.parseObject(response);
             if (jsonResponse != null && jsonResponse.getBoolean("success")) {
@@ -176,15 +176,15 @@ public class WeshopUtils {
     public static JSONObject queryFashionModel(String fashionModelId) {
         try {
             String url = BASE_URL + "/agent/myFashionModel/query?fashionModelId=" + fashionModelId;
-            
+
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", getApiKey());
-            
+
             String response = HttpUtils.sendGet(url, headers);
-            
+
             log.info("查询时尚模型请求URL: {}", url);
             log.info("查询时尚模型响应: {}", response);
-            
+
             // 解析响应
             JSONObject jsonResponse = JSON.parseObject(response);
             if (jsonResponse != null && jsonResponse.getBoolean("success")) {
@@ -209,24 +209,24 @@ public class WeshopUtils {
     public static String createLocation(String imageUrl, String name) {
         try {
             String url = BASE_URL + "/agent/myLocation/create";
-            
+
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("image", imageUrl);
             requestData.put("name", name);
             requestData.put("agentName", "aimodel");
             requestData.put("agentVersion", "v1.0");
-            
+
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", getApiKey());
             headers.put("Content-Type", "application/json");
-            
+
             String jsonData = JSON.toJSONString(requestData);
             String response = HttpUtils.sendPost(url, jsonData, headers);
-            
+
             log.info("创建背景位置请求URL: {}", url);
             log.info("创建背景位置请求参数: {}", jsonData);
             log.info("创建背景位置响应: {}", response);
-            
+
             // 解析响应
             JSONObject jsonResponse = JSON.parseObject(response);
             if (jsonResponse != null && jsonResponse.getBoolean("success")) {
@@ -251,15 +251,15 @@ public class WeshopUtils {
     public static JSONObject queryLocation(String locationId) {
         try {
             String url = BASE_URL + "/agent/myLocation/query?locationId=" + locationId;
-            
+
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", getApiKey());
-            
+
             String response = HttpUtils.sendGet(url, headers);
-            
+
             log.info("查询背景位置请求URL: {}", url);
             log.info("查询背景位置响应: {}", response);
-            
+
             // 解析响应
             JSONObject jsonResponse = JSON.parseObject(response);
             if (jsonResponse != null && jsonResponse.getBoolean("success")) {
@@ -590,6 +590,8 @@ public class WeshopUtils {
                 return (basePrompt != null ? basePrompt : "") + prompt1;
             case "2":
                 return (basePrompt != null ? basePrompt : "") + prompt2;
+            case "3":
+                return (basePrompt != null ? basePrompt : "") + prompt1;
             default:
                 return basePrompt != null ? basePrompt : "";
         }
