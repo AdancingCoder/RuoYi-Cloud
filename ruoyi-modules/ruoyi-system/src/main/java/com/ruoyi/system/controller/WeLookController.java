@@ -674,15 +674,15 @@ public class WeLookController extends BaseController
                         log.error("更新look异常状态失败，look ID: {}", look.getId(), updateException);
                     }
                 }
-                
+
                 //如果look的lookUrl不为空，则调用以下方法
-                if (look.getLookUrl() != null && !look.getLookUrl().isEmpty() && 
-                    !"失败".equals(look.getLookUrl()) && 
-                    !"超时".equals(look.getLookUrl()) && 
-                    !"执行失败".equals(look.getLookUrl()) && 
-                    !"创建任务失败".equals(look.getLookUrl()) && 
+                if (look.getLookUrl() != null && !look.getLookUrl().isEmpty() &&
+                    !"失败".equals(look.getLookUrl()) &&
+                    !"超时".equals(look.getLookUrl()) &&
+                    !"执行失败".equals(look.getLookUrl()) &&
+                    !"创建任务失败".equals(look.getLookUrl()) &&
                     !"异常".equals(look.getLookUrl())) {
-                    
+
                     // 类似generateAiImage方法的处理逻辑
                     try {
                         log.info("开始处理AI图片生成，look ID: {}, name: {}", look.getId(), look.getName());
@@ -735,6 +735,8 @@ public class WeLookController extends BaseController
                                                     weAiPictureService.insertWeAiPicture(aiPicture);
                                                 }
                                                 log.info("AI图片记录保存完成");
+                                                // 将生成的图片URL列表返回给前端
+                                                return AjaxResult.success("自动生成成功").put("imageUrls", imageUrls);
                                             } else if ("Failed".equals(status)) {
                                                 log.info("AI图片任务执行失败，错误信息: {}", result.getError());
 

@@ -88,6 +88,44 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 生成结果展示区域 -->
+    <el-row v-if="generatedImages.length > 0" :gutter="20" style="margin-top: 20px;">
+      <el-col :span="24">
+        <el-card class="result-card">
+          <div slot="header" class="clearfix">
+            <span>生成结果 (共 {{ generatedImages.length }} 张图片)</span>
+          </div>
+          <el-row :gutter="20">
+            <el-col v-for="(image, index) in generatedImages" :key="index" :span="6">
+              <div class="image-result">
+                <img :src="image" class="result-image" @error="handleImageError(index)" />
+                <div class="image-actions">
+                  <el-button type="primary" size="mini" @click="downloadImage(image, index)">查看</el-button>
+                </div>
+              </div>
+            </el-col>
+          </el-row>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 错误信息展示 -->
+    <el-row v-if="errorMessage" :gutter="20" style="margin-top: 20px;">
+      <el-col :span="24">
+        <el-card class="error-card">
+          <div slot="header" class="clearfix">
+            <span>错误信息</span>
+          </div>
+          <el-alert
+            :title="errorMessage"
+            type="error"
+            show-icon
+            :closable="false">
+          </el-alert>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -103,7 +141,9 @@ export default {
       lookImageUrl: '',
       modelImageUrl: '',
       backgroundImageUrl: '',
-      generateLoading: false
+      generateLoading: false,
+      generatedImages: [], // 存储生成的图片URL
+      errorMessage: '' // 存储错误信息
     }
   },
   created() {
@@ -117,7 +157,7 @@ export default {
         this.$message.error('文件大小不能超过10MB');
         return;
       }
-      
+
       this.lookFile = file.raw;
       this.lookImageUrl = URL.createObjectURL(file.raw);
     },
@@ -128,7 +168,7 @@ export default {
         this.$message.error('文件大小不能超过10MB');
         return;
       }
-      
+
       this.modelFile = file.raw;
       this.modelImageUrl = URL.createObjectURL(file.raw);
     },
@@ -139,7 +179,7 @@ export default {
         this.$message.error('文件大小不能超过10MB');
         return;
       }
-      
+
       this.backgroundFile = file.raw;
       this.backgroundImageUrl = URL.createObjectURL(file.raw);
     },
@@ -149,8 +189,10 @@ export default {
         this.$message.error('请先选择所有文件');
         return;
       }
-      
+
       this.generateLoading = true;
+      this.generatedImages = []; // 清空之前的结果
+      this.errorMessage = ''; // 清空之前的错误信息
       try {
         // 创建FormData对象
         const formData = new FormData();
@@ -160,14 +202,41 @@ export default {
 
         // 调用后端接口
         const response = await autoGenerateAiImage(formData);
-        this.$message.success('生成成功');
         console.log('生成结果:', response);
+
+        // 处理返回的图片URL
+        // 根据request.js的响应拦截器，response已经是res.data
+        if (response.code === 200) {
+          this.$message.success('生成成功');
+          // 检查是否有imageUrls数据
+          if (response.imageUrls && response.imageUrls.length > 0) {
+            this.generatedImages = response.imageUrls;
+          } else {
+            this.$message.info('未生成图片或图片数据为空');
+          }
+        } else {
+          this.errorMessage = response.msg || response.message || '未知错误';
+          this.$message.error('生成失败: ' + this.errorMessage);
+        }
       } catch (error) {
+        this.errorMessage = error.message;
         this.$message.error('生成失败: ' + error.message);
         console.error('生成失败:', error);
       } finally {
         this.generateLoading = false;
       }
+    },
+    // 下载图片
+    downloadImage(url, index) {
+      // 打开新标签页显示图片
+      const newWindow = window.open(url, '_blank');
+      if (!newWindow) {
+        this.$message.error('弹窗被阻止，请允许弹窗后重试');
+      }
+    },
+    // 处理图片加载错误
+    handleImageError(index) {
+      this.$message.warning(`图片 ${index + 1} 加载失败`);
     }
   }
 }
@@ -175,7 +244,9 @@ export default {
 
 <style scoped>
 .upload-card,
-.generate-card {
+.generate-card,
+.result-card,
+.error-card {
   height: 100%;
 }
 
@@ -184,12 +255,30 @@ export default {
   text-align: center;
 }
 
-.preview-image {
+.preview-image,
+.result-image {
   max-width: 100%;
   max-height: 150px;
 }
 
 .upload-demo {
   text-align: center;
+}
+
+.image-result {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.result-image {
+  max-width: 100%;
+  max-height: 200px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.image-actions {
+  margin-top: 10px;
 }
 </style>
