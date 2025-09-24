@@ -147,7 +147,7 @@ public class WeshopUtils {
 
             String jsonData = JSON.toJSONString(requestData);
             String response = HttpUtils.sendPost(url, jsonData, headers);
-
+            Thread.sleep(2000);
             log.info("创建时尚模型请求URL: {}", url);
             log.info("创建时尚模型请求参数: {}", jsonData);
             log.info("创建时尚模型响应: {}", response);
@@ -222,7 +222,7 @@ public class WeshopUtils {
 
             String jsonData = JSON.toJSONString(requestData);
             String response = HttpUtils.sendPost(url, jsonData, headers);
-
+            Thread.sleep(2000);
             log.info("创建背景位置请求URL: {}", url);
             log.info("创建背景位置请求参数: {}", jsonData);
             log.info("创建背景位置响应: {}", response);

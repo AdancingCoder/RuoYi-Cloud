@@ -611,7 +611,7 @@ public class WeLookController extends BaseController
                         // 更新任务ID
                         look.setTaskId(taskId);
                         weLookService.updateWeLook(look);
-
+                        Thread.sleep(2000);
                         // 2. 执行任务
                         String executionId = WeshopUtils.executeTask(taskId, look.getModelWeId(), look.getBackWeId());
                         if (executionId != null) {
