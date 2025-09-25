@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.File;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.system.api.RemoteFileService;
@@ -544,15 +545,15 @@ public class WeLookController extends BaseController
             }
 
             // 查询背景位置信息
-/*            JSONObject locationData = WeshopUtils.queryLocation(locationId);
+            JSONObject locationData = WeshopUtils.queryLocation(locationId);
             if (locationData == null) {
                 return AjaxResult.error("查询背景位置失败");
-            }*/
+            }
 
             // 保存背景数据到we_back表
             WeBack back = new WeBack();
             back.setName(backName);
-            back.setBackUrl(backgroundImageUrl);
+            back.setBackUrl(locationData.getString("image"));
             back.setBackWeId(locationId);
             back.setType("3"); // 设置type为3
             weBackService.insertWeBack(back);
