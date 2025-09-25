@@ -235,7 +235,7 @@ public class WeLookController extends BaseController
         }
 
         // 创建固定大小的线程池，避免过多并发请求
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        ExecutorService executorService = Executors.newFixedThreadPool(15);
 
         // 异步处理任务
         List<CompletableFuture<Void>> futures = new ArrayList<>();

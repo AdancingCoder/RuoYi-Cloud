@@ -103,14 +103,14 @@
           @click="handleUpdatePrompts"
           v-hasPermi="['system:back:updatePrompts']"
         >更新提示词</el-button>
-        <el-button
+<!--        <el-button
           type="warning"
           plain
           icon="el-icon-download"
           size="mini"
           @click="importTemplate"
           v-hasPermi="['system:back:updatePrompts']"
-        >下载模板</el-button>
+        >下载模板</el-button>-->
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
