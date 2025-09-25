@@ -10,6 +10,7 @@ import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationP
 import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationResult;
 import com.alibaba.dashscope.common.MultiModalMessage;
 import com.alibaba.dashscope.common.Role;
+import com.alibaba.dashscope.exception.ApiException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.alibaba.dashscope.exception.UploadFileException;
 import com.ruoyi.common.core.utils.DateUtils;
@@ -121,36 +122,41 @@ public class WeBackServiceImpl implements IWeBackService
 
 
     public String getPromot(String filesUrl) {
-        MultiModalConversation conv = new MultiModalConversation();
-        ArrayList<Map<String,Object>> content = new ArrayList<>();
-        Map<String, Object> image = Collections.singletonMap("image", filesUrl);
-        Map<String, Object> text1 = Collections.singletonMap("text", "详细描述一下这张图片，不需要描述帽子，头发,衣服,项链,耳饰，鞋子,重点描述模特的姿态");
-        content.add(image);
-        content.add(text1);
-        MultiModalMessage userMessage =
-                MultiModalMessage.builder().role(Role.USER.getValue()).content(content).build();
 
-        MultiModalConversationParam conversationParam = MultiModalConversationParam.builder()
-                // 若没有配置环境变量，请用百炼API Key将下行替换为：.apiKey("sk-xxx")
-                .apiKey("sk-fb13640c656c462ea2d35b14b3b14a31")
-
-                // 此处以qwen-vl-max-latest为例，可按需更换模型名称。模型列表：https://help.aliyun.com/model-studio/getting-started/models
-                .model("qwen-vl-max-latest")
-                .build();
-
-        conversationParam.setMessages(Collections.singletonList(userMessage));
-
-        MultiModalConversationResult result = null;
         try {
-            result = conv.call(conversationParam);
-        } catch (NoApiKeyException | UploadFileException e) {
-            log.error("", e);
-        }
-        assert result != null;
-        String text = (String) result.getOutput().getChoices().get(0).getMessage().getContent().get(0).get("text");
-        String s = text.replaceAll("\n", "");
-        return s;
+            MultiModalConversation conv = new MultiModalConversation();
+            ArrayList<Map<String,Object>> content = new ArrayList<>();
+            Map<String, Object> image = Collections.singletonMap("image", filesUrl);
+            Map<String, Object> text1 = Collections.singletonMap("text", "详细描述一下这张图片，不需要描述帽子，头发,衣服,项链,耳饰，鞋子,重点描述模特的姿态");
+            content.add(image);
+            content.add(text1);
+            MultiModalMessage userMessage =
+                    MultiModalMessage.builder().role(Role.USER.getValue()).content(content).build();
 
+            MultiModalConversationParam conversationParam = MultiModalConversationParam.builder()
+                    // 若没有配置环境变量，请用百炼API Key将下行替换为：.apiKey("sk-xxx")
+                    .apiKey("sk-fb13640c656c462ea2d35b14b3b14a31")
+
+                    // 此处以qwen-vl-max-latest为例，可按需更换模型名称。模型列表：https://help.aliyun.com/model-studio/getting-started/models
+                    .model("qwen-vl-max-latest")
+                    .build();
+
+            conversationParam.setMessages(Collections.singletonList(userMessage));
+
+            MultiModalConversationResult result = null;
+
+            result = conv.call(conversationParam);
+
+            assert result != null;
+            String text = (String) result.getOutput().getChoices().get(0).getMessage().getContent().get(0).get("text");
+            String s = text.replaceAll("\n", "");
+            log.info("提示词生成成功：{}",s);
+            return s;
+        }
+        catch (Exception e) {
+            log.error("提示词生成失败", e);
+            return null;
+        }
     }
 
     @Override

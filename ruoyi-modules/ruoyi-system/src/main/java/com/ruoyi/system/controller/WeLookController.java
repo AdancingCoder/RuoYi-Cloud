@@ -50,6 +50,7 @@ import com.ruoyi.common.core.web.page.TableDataInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.ruoyi.common.core.utils.HttpUtils.uploadFile;
+import static java.lang.Thread.sleep;
 
 /**
  * 外观Controller
@@ -79,6 +80,7 @@ public class WeLookController extends BaseController
 
     @Autowired
     private RemoteFileService remoteFileService;
+
 
     /**
      * 查询外观列表
@@ -529,11 +531,15 @@ public class WeLookController extends BaseController
             File tempBackgroundFile = File.createTempFile("background_", ".png");
             backgroundFile.transferTo(tempBackgroundFile);
 
+
+
             // 上传背景图片到Weshop
             String backgroundImageUrl = WeshopUtils.uploadImage(tempBackgroundFile);
             if (backgroundImageUrl == null) {
                 return AjaxResult.error("上传背景图片失败");
             }
+            // 生成提示词
+            CompletableFuture<String> promotFuture = CompletableFuture.supplyAsync(() -> weBackService.getPromot(backgroundImageUrl));
 
             // 创建背景位置
             // 查询we_back表主键最大值加1作为name
@@ -556,6 +562,7 @@ public class WeLookController extends BaseController
             back.setBackUrl(locationData.getString("image"));
             back.setBackWeId(locationId);
             back.setType("3"); // 设置type为3
+            back.setPromot(promotFuture.get());
             weBackService.insertWeBack(back);
 
             // 3. 上传look图片处理逻辑

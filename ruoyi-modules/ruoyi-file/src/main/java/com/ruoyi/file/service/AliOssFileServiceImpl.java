@@ -58,7 +58,6 @@ public class AliOssFileServiceImpl implements ISysFileService {
             InputStream inputStream = file.getInputStream();
             //上传至第三方云服务或服务器
             fileKey =  directoryPath + "/" + fileKey;
-            //上传至第三方云服务或服务器
             OSS ossClient = new OSSClientBuilder().build(
                     endpoint,
                     accessKeyId,
@@ -82,9 +81,6 @@ public class AliOssFileServiceImpl implements ISysFileService {
                 log.error("Error Message: " + ce.getMessage());
                 throw new RuntimeException("AliOSS Failed to upload file",ce);
             } finally {
-                /*
-                 * Do not forget to shut down the client finally to release all allocated resources.
-                 */
                 ossClient.shutdown();
             }
             ossClient.shutdown();
@@ -99,7 +95,31 @@ public class AliOssFileServiceImpl implements ISysFileService {
         return "https://" + bucketName + "." + endpoint + "/";
     }
     @Override
-    public void deleteFile(String fileUrl) throws Exception {
+    public void deleteFile(String fileUrl) {
+        if (StringUtils.isEmpty(fileUrl)) {
+            throw new ServiceException("文件URL不能为空");
+        }
+        String urlPrefix = getUrlPrefix();
+        if (!fileUrl.startsWith(urlPrefix)) {
+            throw new ServiceException("非法的文件URL: " + fileUrl);
+        }
+        String objectKey = fileUrl.substring(urlPrefix.length());
 
+        OSS ossClient = null;
+        try {
+            ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+            ossClient.deleteObject(bucketName, objectKey);
+            log.info("删除 OSS 文件成功，objectKey={}", objectKey);
+        } catch (OSSException oe) {
+            log.error("OSS 删除失败: {}", oe.getErrorMessage(), oe);
+            throw new RuntimeException("AliOSS Failed to delete file", oe);
+        } catch (ClientException ce) {
+            log.error("OSS 客户端异常: {}", ce.getMessage(), ce);
+            throw new RuntimeException("AliOSS Failed to delete file", ce);
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
     }
 }
