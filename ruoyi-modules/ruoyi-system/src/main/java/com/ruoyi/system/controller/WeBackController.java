@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -170,7 +172,8 @@ public class WeBackController extends BaseController
 
                     // 检查背景数据是否已存在
                     WeBack existBack = weBackService.selectWeBackByWeId(id);
-                    if (existBack == null && name.compareTo("bsd97") > 0) {
+                    if (existBack == null && shouldIncludeBsdModel(name)) {
+
                         // 新增背景数据
                         WeBack back = new WeBack();
                         back.setName(name);
@@ -305,5 +308,23 @@ public class WeBackController extends BaseController
             logger.error("更新提示词失败", e);
             return error("更新失败：" + e.getMessage());
         }
+    }
+
+    /**
+     * 判断是否应该包含指定名称的bsd模型
+     * 对于bsd+数字格式，只有数字大于103才包含
+     */
+    private boolean shouldIncludeBsdModel(String name) {
+        if (name.startsWith("bsd")) {
+            try {
+                int number = Integer.parseInt(name.substring(3));
+                return number > 103;
+            } catch (NumberFormatException e) {
+                // 如果bsd后面不是数字，按照原来逻辑处理
+                return "bsd103".equals(name);
+            }
+        }
+        // 对于非bsd开头的名称（如tan等），保持原来的处理逻辑
+        return true;
     }
 }
