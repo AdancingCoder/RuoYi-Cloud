@@ -440,7 +440,7 @@ export default {
     /** 生成模特及背景 */
     handleGenerateModelAndBack() {
       this.$modal.confirm('是否确认生成模特及背景数据？').then(function() {
-        return generateModelAndBack({});
+        return generateModelAndBack();
       }).then((response) => {
         this.$modal.msgSuccess(response.msg);
         this.getList();

@@ -2,6 +2,7 @@ package com.ruoyi.common.core.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,6 +41,39 @@ public class WeshopUtils {
     private static String getApiKey() {
         // TODO: 实现从配置中心或安全存储中动态获取API密钥
         return API_KEY;
+    }
+
+    /**
+     * 获取Agent信息
+     *
+     * @param agentName Agent名称
+     * @param agentVersion Agent版本
+     * @return 包含locations和fashionModels数据的JSONObject
+     */
+    public static JSONObject getAgentInfo(String agentName, String agentVersion) {
+        try {
+            String url = BASE_URL + "/agent/info?agentName=" + agentName + "&agentVersion=" + agentVersion;
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", getApiKey());
+
+            String response = HttpUtils.sendGet(url, headers);
+
+            log.info("获取Agent信息请求URL: {}", url);
+            log.info("获取Agent信息响应: {}", response);
+
+            // 解析响应
+            JSONObject jsonResponse = JSON.parseObject(response);
+            if (jsonResponse != null && jsonResponse.getBoolean("success")) {
+                return jsonResponse.getJSONObject("data");
+            } else {
+                log.error("获取Agent信息失败: {}", jsonResponse != null ? jsonResponse.getString("msg") : "响应为空");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("获取Agent信息异常", e);
+            return null;
+        }
     }
 
     /**

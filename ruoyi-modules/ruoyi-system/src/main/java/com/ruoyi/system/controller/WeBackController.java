@@ -28,6 +28,8 @@ import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.web.page.TableDataInfo;
+import com.ruoyi.common.core.utils.WeshopUtils;
+import com.alibaba.fastjson2.JSONObject;
 
 /**
  * 背景Controller
@@ -122,18 +124,18 @@ public class WeBackController extends BaseController
     @RequiresPermissions("system:back:generate")
     @Log(title = "背景", businessType = BusinessType.INSERT)
     @PostMapping("/generate")
-    public AjaxResult generateModelAndBack(@RequestBody Map<String, Object> jsonData)
+    public AjaxResult generateModelAndBack()
     {
         try {
-            // 获取data数据，添加空值检查
-            Map<String, Object> data = (Map<String, Object>) jsonData.get("data");
-            if (data == null) {
-                return error("生成失败：缺少'data'数据");
+            // 调用Weshop API获取agent信息
+            JSONObject agentInfo = WeshopUtils.getAgentInfo("aimodel", "v1.0");
+            if (agentInfo == null) {
+                return error("生成失败：无法获取agent信息");
             }
 
             // 获取locations和fashionModels数据
-            List<Map<String, Object>> locations = (List<Map<String, Object>>) data.get("locations");
-            List<Map<String, Object>> fashionModels = (List<Map<String, Object>>) data.get("fashionModels");
+            List<Map<String, Object>> locations = (List<Map<String, Object>>) agentInfo.get("locations");
+            List<Map<String, Object>> fashionModels = (List<Map<String, Object>>) agentInfo.get("fashionModels");
 
             int backCount = processLocations(locations);
             int modelCount = processFashionModels(fashionModels);
@@ -168,13 +170,15 @@ public class WeBackController extends BaseController
 
                     // 检查背景数据是否已存在
                     WeBack existBack = weBackService.selectWeBackByWeId(id);
-                    if (existBack == null) {
+                    if (existBack == null && name.compareTo("bsd97") > 0) {
                         // 新增背景数据
                         WeBack back = new WeBack();
                         back.setName(name);
                         back.setBackUrl(image);
                         back.setBackWeId(id);
                         back.setType(type);
+                        System.out.println(name + "--------" + id);
+                        back.setPromot(weBackService.getPromot(image));
                         weBackService.insertWeBack(back);
                         backCount++;
                     }

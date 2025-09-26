@@ -44,11 +44,10 @@ export function delBack(id) {
 }
 
 // 生成模特及背景
-export function generateModelAndBack(data) {
+export function generateModelAndBack() {
   return request({
     url: '/system/back/generate',
-    method: 'post',
-    data: data
+    method: 'post'
   })
 }
 
