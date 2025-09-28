@@ -1,7 +1,8 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
-import com.ruoyi.common.core.utils.DateUtils;
+
+import com.ruoyi.common.core.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.WeClothMapper;
@@ -53,7 +54,6 @@ public class WeClothServiceImpl implements IWeClothService
     @Override
     public int insertWeCloth(WeCloth weCloth)
     {
-        weCloth.setCreateTime(DateUtils.getNowDate());
         return weClothMapper.insertWeCloth(weCloth);
     }
 
@@ -66,7 +66,6 @@ public class WeClothServiceImpl implements IWeClothService
     @Override
     public int updateWeCloth(WeCloth weCloth)
     {
-        weCloth.setUpdateTime(DateUtils.getNowDate());
         return weClothMapper.updateWeCloth(weCloth);
     }
 
@@ -103,5 +102,40 @@ public class WeClothServiceImpl implements IWeClothService
     public Long selectWeClothMaxId()
     {
         return weClothMapper.selectWeClothMaxId();
+    }
+
+    /**
+     * 根据前缀生成服装名称
+     *
+     * @param prefix 前缀
+     * @return 服装名称
+     */
+    @Override
+    public String generateClothName(String prefix) {
+        // 构造查询条件
+        WeCloth weCloth = new WeCloth();
+        weCloth.setName(prefix);
+        
+        // 查询数据库中符合前缀的记录
+        List<WeCloth> cloths = weClothMapper.selectWeClothList(weCloth);
+        
+        // 查找最大编号
+        int maxNumber = 0;
+        for (WeCloth cloth : cloths) {
+            String name = cloth.getName();
+            if (name != null && name.startsWith(prefix)) {
+                // 提取数字部分
+                String numberStr = name.substring(prefix.length());
+                if (StringUtils.isNumeric(numberStr)) {
+                    int number = Integer.parseInt(numberStr);
+                    if (number > maxNumber) {
+                        maxNumber = number;
+                    }
+                }
+            }
+        }
+        
+        // 返回新名称
+        return prefix + (maxNumber + 1);
     }
 }

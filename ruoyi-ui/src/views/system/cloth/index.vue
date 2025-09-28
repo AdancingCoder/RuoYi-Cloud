@@ -48,6 +48,16 @@
         <el-button
           type="success"
           plain
+          icon="el-icon-upload"
+          size="mini"
+          @click="handleUploadLook"
+          v-hasPermi="['system:cloth:add']"
+        >上传look图</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="success"
+          plain
           icon="el-icon-edit"
           size="mini"
           :disabled="single"
@@ -156,11 +166,44 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 上传look图对话框 -->
+    <el-dialog title="上传look图" :visible.sync="uploadLookOpen" width="500px" append-to-body>
+      <el-form ref="uploadLookForm" :model="uploadLookForm" :rules="uploadLookRules" label-width="80px">
+        <el-form-item label="选择图片" prop="lookFile">
+          <el-upload
+            class="avatar-uploader"
+            action="#"
+            :auto-upload="false"
+            :show-file-list="true"
+            :on-change="handleFileChange"
+            accept="image/*"
+          >
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过20MB</div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="服装类型" prop="type">
+          <el-select v-model="uploadLookForm.type" placeholder="请选择服装类型">
+            <el-option
+              v-for="dict in dict.type.brand_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitUploadLook">确 定</el-button>
+        <el-button @click="cancelUploadLook">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listCloth, getCloth, delCloth, addCloth, updateCloth } from "@/api/system/cloth"
+import { listCloth, getCloth, delCloth, addCloth, updateCloth, uploadLook } from "@/api/system/cloth"
 
 export default {
   name: "Cloth",
@@ -185,6 +228,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否显示上传look图弹出层
+      uploadLookOpen: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -196,8 +241,18 @@ export default {
       },
       // 表单参数
       form: {},
+      // 上传look图表单参数
+      uploadLookForm: {
+        lookFile: null,
+        type: null
+      },
       // 表单校验
       rules: {
+      },
+      // 上传look图表单校验
+      uploadLookRules: {
+        lookFile: [{ required: true, message: "请选择图片文件", trigger: "change" }],
+        type: [{ required: true, message: "请选择服装类型", trigger: "change" }]
       }
     }
   },
@@ -256,6 +311,36 @@ export default {
       this.reset()
       this.open = true
       this.title = "添加服装"
+    },
+    /** 上传look图按钮操作 */
+    handleUploadLook() {
+      this.uploadLookForm = {
+        lookFile: null,
+        type: null
+      }
+      this.uploadLookOpen = true
+      this.resetForm("uploadLookForm")
+    },
+    /** 文件选择处理 */
+    handleFileChange(file) {
+      this.uploadLookForm.lookFile = file.raw
+    },
+    /** 取消上传look图 */
+    cancelUploadLook() {
+      this.uploadLookOpen = false
+      this.resetForm("uploadLookForm")
+    },
+    /** 提交上传look图 */
+    submitUploadLook() {
+      this.$refs["uploadLookForm"].validate(valid => {
+        if (valid) {
+          uploadLook(this.uploadLookForm).then(response => {
+            this.$modal.msgSuccess("上传成功")
+            this.uploadLookOpen = false
+            this.getList()
+          })
+        }
+      })
     },
     /** 修改按钮操作 */
     handleUpdate(row) {

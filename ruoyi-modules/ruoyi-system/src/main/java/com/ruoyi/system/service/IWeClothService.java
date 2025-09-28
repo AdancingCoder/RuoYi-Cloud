@@ -65,4 +65,12 @@ public interface IWeClothService
      * @return 主键最大值
      */
     public Long selectWeClothMaxId();
+
+    /**
+     * 根据前缀生成服装名称
+     *
+     * @param prefix 前缀
+     * @return 服装名称
+     */
+    public String generateClothName(String prefix);
 }

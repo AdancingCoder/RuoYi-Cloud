@@ -42,3 +42,15 @@ export function delCloth(id) {
     method: 'delete'
   })
 }
+
+// 上传look图
+export function uploadLook(data) {
+  return request({
+    url: '/system/cloth/uploadLook',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
