@@ -127,7 +127,7 @@ public class WeBackServiceImpl implements IWeBackService
             MultiModalConversation conv = new MultiModalConversation();
             ArrayList<Map<String,Object>> content = new ArrayList<>();
             Map<String, Object> image = Collections.singletonMap("image", filesUrl);
-            Map<String, Object> text1 = Collections.singletonMap("text", "详细描述一下这张图片，不需要描述帽子，头发,衣服,项链,耳饰，鞋子,重点描述模特的姿态");
+            Map<String, Object> text1 = Collections.singletonMap("text", "详细描述一下这张图片,重点描述模特的姿态，不要包含帽子，头发,衣服,项链,耳饰,包,鞋子,狗，狗绳，犬");
             content.add(image);
             content.add(text1);
             MultiModalMessage userMessage =
