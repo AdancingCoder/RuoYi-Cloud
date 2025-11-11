@@ -1,56 +1,54 @@
 package com.ruoyi.system.controller;
 
+import com.alibaba.fastjson2.JSONObject;
+import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.utils.AlgorithmUtils;
+import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.WeshopUtils;
+import com.ruoyi.common.core.utils.poi.ExcelUtil;
+import com.ruoyi.common.core.web.controller.BaseController;
+import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.common.core.web.page.TableDataInfo;
+import com.ruoyi.common.log.annotation.Log;
+import com.ruoyi.common.log.enums.BusinessType;
+import com.ruoyi.common.security.annotation.RequiresPermissions;
+import com.ruoyi.system.api.RemoteFileService;
+import com.ruoyi.system.api.domain.SysFile;
+import com.ruoyi.system.domain.WeAiPicture;
+import com.ruoyi.system.domain.WeBack;
+import com.ruoyi.system.domain.WeCloth;
+import com.ruoyi.system.domain.WeLook;
+import com.ruoyi.system.domain.WeModel;
+import com.ruoyi.system.service.IWeAiPictureService;
+import com.ruoyi.system.service.IWeBackService;
+import com.ruoyi.system.service.IWeClothService;
+import com.ruoyi.system.service.IWeLookService;
+import com.ruoyi.system.service.IWeModelService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-import java.io.IOException;
-import java.io.File;
-import javax.servlet.http.HttpServletResponse;
-
-import com.alibaba.fastjson2.JSONObject;
-import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.utils.StringUtils;
-import com.ruoyi.system.api.RemoteFileService;
-import com.ruoyi.system.api.domain.SysFile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.RequestParam;
-import com.ruoyi.common.log.annotation.Log;
-import com.ruoyi.common.log.enums.BusinessType;
-import com.ruoyi.common.security.annotation.RequiresPermissions;
-import com.ruoyi.system.domain.WeLook;
-import com.ruoyi.system.domain.WeCloth;
-import com.ruoyi.system.domain.WeModel;
-import com.ruoyi.system.domain.WeBack;
-import com.ruoyi.system.service.IWeClothService;
-import com.ruoyi.system.service.IWeModelService;
-import com.ruoyi.system.service.IWeBackService;
-import com.ruoyi.system.service.IWeLookService;
-import com.ruoyi.system.service.IWeAiPictureService;
-import com.ruoyi.system.domain.WeAiPicture;
-import com.ruoyi.common.core.utils.WeshopUtils;
-import com.ruoyi.common.core.web.controller.BaseController;
-import com.ruoyi.common.core.web.domain.AjaxResult;
-import com.ruoyi.common.core.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.web.page.TableDataInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static com.ruoyi.common.core.utils.HttpUtils.uploadFile;
-import static java.lang.Thread.sleep;
 
 /**
  * 外观Controller
@@ -59,10 +57,10 @@ import static java.lang.Thread.sleep;
  */
 @RestController
 @RequestMapping("/look")
-public class WeLookController extends BaseController
-{
+public class WeLookController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(WeLookController.class);
-
+    private static final int AI_EXPAND_TARGET_WIDTH = 1660;
+    private static final int AI_EXPAND_TARGET_HEIGHT = 1660;
     @Autowired
     private IWeLookService weLookService;
 
@@ -87,8 +85,7 @@ public class WeLookController extends BaseController
      */
     @RequiresPermissions("system:look:list")
     @GetMapping("/list")
-    public TableDataInfo list(WeLook weLook)
-    {
+    public TableDataInfo list(WeLook weLook) {
         startPage();
         List<WeLook> list = weLookService.selectWeLookList(weLook);
         return getDataTable(list);
@@ -100,8 +97,7 @@ public class WeLookController extends BaseController
     @RequiresPermissions("system:look:export")
     @Log(title = "外观", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, WeLook weLook)
-    {
+    public void export(HttpServletResponse response, WeLook weLook) {
         List<WeLook> list = weLookService.selectWeLookList(weLook);
         ExcelUtil<WeLook> util = new ExcelUtil<WeLook>(WeLook.class);
         util.exportExcel(response, list, "外观数据");
@@ -112,8 +108,7 @@ public class WeLookController extends BaseController
      */
     @RequiresPermissions("system:look:query")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(weLookService.selectWeLookById(id));
     }
 
@@ -123,8 +118,7 @@ public class WeLookController extends BaseController
     @RequiresPermissions("system:look:add")
     @Log(title = "外观", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody WeLook weLook)
-    {
+    public AjaxResult add(@RequestBody WeLook weLook) {
         return toAjax(weLookService.insertWeLook(weLook));
     }
 
@@ -134,8 +128,7 @@ public class WeLookController extends BaseController
     @RequiresPermissions("system:look:edit")
     @Log(title = "外观", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody WeLook weLook)
-    {
+    public AjaxResult edit(@RequestBody WeLook weLook) {
         return toAjax(weLookService.updateWeLook(weLook));
     }
 
@@ -145,8 +138,7 @@ public class WeLookController extends BaseController
     @RequiresPermissions("system:look:remove")
     @Log(title = "外观", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
+    public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(weLookService.deleteWeLookByIds(ids));
     }
 
@@ -156,8 +148,7 @@ public class WeLookController extends BaseController
     @RequiresPermissions("system:look:add")
     @Log(title = "外观", businessType = BusinessType.INSERT)
     @PostMapping("/generateData")
-    public AjaxResult generateData()
-    {
+    public AjaxResult generateData() {
         // 查询所有服装数据
         List<WeCloth> clothList = weClothService.selectWeClothList(new WeCloth());
         // 查询所有模特数据
@@ -227,8 +218,7 @@ public class WeLookController extends BaseController
     @RequiresPermissions("system:look:add")
     @Log(title = "外观", businessType = BusinessType.UPDATE)
     @PostMapping("/generateLooks")
-    public AjaxResult generateLooks(@RequestBody Long[] ids)
-    {
+    public AjaxResult generateLooks(@RequestBody Long[] ids) {
         List<WeLook> looks = new ArrayList<>();
         for (Long id : ids) {
             looks.add(weLookService.selectWeLookById(id));
@@ -273,16 +263,13 @@ public class WeLookController extends BaseController
     public AjaxResult upLoad(@PathVariable(value = "type") String type, MultipartFile file) {
 
 
-
         return AjaxResult.success("任务已提交，正在后台处理");
     }
 
 
-
-
-
     /**
      * 处理单个look的生成任务
+     *
      * @param look 需要处理的look对象
      */
     private void processLook(WeLook look) {
@@ -404,18 +391,45 @@ public class WeLookController extends BaseController
                                     if ("Success".equals(status)) {
                                         List<String> imageUrls = result.getImageUrls();
                                         log.info("AI图片任务成功完成，共生成 {} 张图片", imageUrls.size());
-
                                         // 为每张图片创建WeAiPicture记录
                                         for (String imageUrl : imageUrls) {
-                                            WeAiPicture aiPicture = new WeAiPicture();
-                                            aiPicture.setName(look.getName());
-                                            aiPicture.setType(look.getType());
-                                            aiPicture.setLookId(look.getId());
-                                            aiPicture.setLookUrl(look.getLookUrl());
-                                            aiPicture.setTaskId(taskId);
-                                            aiPicture.setExecuteId(executionId);
-                                            aiPicture.setAiUrl(imageUrl);
-                                            weAiPictureService.insertWeAiPicture(aiPicture);
+                                            // 使用AlgorithmUtils调用repairImage方法
+                                            log.info("logo修复开始");
+                                            System.out.println("logo修复开始");
+                                            JSONObject repairResult = AlgorithmUtils.repairImage(
+                                                    imageUrl,  // image参数
+                                                    look.getClothUrl(), // detailedImage参数
+                                                    look.getName()      // taskName参数
+                                            );
+                                            String repairedImageUrl = null;
+                                            if (repairResult != null) {
+                                                repairedImageUrl = repairResult.getString("result");
+                                            }
+                                            log.info("logo修复结束，超分开始");
+                                            //AI 扩图任务
+                                                System.out.println("AI 扩图开始");
+                                                String expandimageUrl = expandAndGetUpscaleUrl(look.getName(), repairedImageUrl, AI_EXPAND_TARGET_WIDTH, AI_EXPAND_TARGET_HEIGHT);
+                                                System.out.println("AI 扩图结束");
+                                                //upscaleImage
+                                                // 使用AlgorithmUtils调用upscaleImage方法
+                                                if (expandimageUrl != null) {
+                                                    System.out.println("超分开始");
+                                                    JSONObject upscaleResult = AlgorithmUtils.upscaleImage(expandimageUrl);
+                                                    String upscaledImageUrl = upscaleResult.getString("result");
+                                                    System.out.println("超分结束");
+
+                                                    WeAiPicture aiPicture = new WeAiPicture();
+                                                    aiPicture.setName(look.getName());
+                                                    aiPicture.setType(look.getType());
+                                                    aiPicture.setLookId(look.getId());
+                                                    aiPicture.setLookUrl(look.getLookUrl());
+                                                    aiPicture.setTaskId(taskId);
+                                                    aiPicture.setExecuteId(executionId);
+                                                    aiPicture.setAiUrl(upscaledImageUrl);
+                                                    aiPicture.setRemark(imageUrl);
+                                                    weAiPictureService.insertWeAiPicture(aiPicture);
+                                                }
+
                                         }
                                         log.info("AI图片记录保存完成");
                                     } else if ("Failed".equals(status)) {
@@ -455,14 +469,80 @@ public class WeLookController extends BaseController
         }
     }
 
+
+    /**
+     * 执行 AI 扩图任务并返回最终 URL
+     *
+     * @param imageName       图片名称
+     * @param repairedImageUrl 修复后的图片 URL
+     * @param targetWidth     扩图目标宽度
+     * @param targetHeight    扩图目标高度
+     * @return 扩图成功的 URL，如果失败返回修复图 URL
+     */
+    public String expandAndGetUpscaleUrl(String imageName, String repairedImageUrl, int targetWidth, int targetHeight) {
+        if (repairedImageUrl == null) {
+            return null;
+        }
+
+        String expandedImageUrl = null;
+        try {
+            log.info("AI扩图开始, imageName={}", imageName);
+            String expandTaskId = WeshopUtils.createAiEnlargeImageTask(imageName, repairedImageUrl);
+            if (expandTaskId == null) {
+                log.error("创建扩图任务失败，imageName={}", imageName);
+                return repairedImageUrl;
+            }
+
+            String executeExpandId = WeshopUtils.executeAiEnlargeImageTask(expandTaskId, targetWidth, targetHeight);
+            if (executeExpandId == null) {
+                log.error("执行扩图任务失败，taskId={}", expandTaskId);
+                return repairedImageUrl;
+            }
+
+            String expandStatus = "Pending";
+            int retry = 0;
+            int maxRetry = 60;       // 最大轮询次数
+            long pollInterval = 5000L; // 轮询间隔（毫秒）
+
+            while (!"Success".equals(expandStatus) && !"Failed".equals(expandStatus) && retry < maxRetry) {
+                Thread.sleep(pollInterval);
+                retry++;
+                WeshopUtils.AiImageTaskResult result = WeshopUtils.queryAiImageTask(expandTaskId, executeExpandId);
+                if (result != null) {
+                    expandStatus = result.getStatus();
+                    if ("Success".equals(expandStatus)) {
+                        List<String> urls = result.getImageUrls();
+                        if (urls != null && !urls.isEmpty()) {
+                            expandedImageUrl = urls.get(0);
+                            log.info("扩图成功并保存，url={}", expandedImageUrl);
+                        }
+                    } else if ("Failed".equals(expandStatus)) {
+                        log.error("扩图任务失败，taskId={}, error={}", expandTaskId, result.getError());
+                    }
+                } else {
+                    log.warn("扩图查询返回空结果，taskId={}", expandTaskId);
+                }
+            }
+
+            if (retry >= maxRetry) {
+                log.error("扩图任务超时，taskId={}", expandTaskId);
+            }
+        } catch (Exception e) {
+            log.error("扩图异常，imageName=" + imageName, e);
+        }
+
+        // 返回扩图 URL，如果失败返回修复图
+        return expandedImageUrl != null ? expandedImageUrl : repairedImageUrl;
+    }
+
+
     /**
      * 生成AI图
      */
     //@RequiresPermissions("system:look:generateAiImage")
     @Log(title = "外观", businessType = BusinessType.UPDATE)
     @PostMapping("/generateAiImage")
-    public AjaxResult generateAiImage(@RequestBody Long[] ids)
-    {
+    public AjaxResult generateAiImage(@RequestBody Long[] ids) {
         List<WeLook> looks = new ArrayList<>();
         for (Long id : ids) {
             looks.add(weLookService.selectWeLookById(id));
@@ -470,65 +550,50 @@ public class WeLookController extends BaseController
 
         // 异步处理任务
         //new Thread(() -> {
-            for (WeLook look : looks) {
-                try {
-                    log.info("开始处理AI图片生成，look ID: {}, name: {}", look.getId(), look.getName());
+        for (WeLook look : looks) {
+            try {
+                log.info("开始处理AI图片生成，look ID: {}, name: {}", look.getId(), look.getName());
 
-                    // 获取背景信息（包含提示词）
-                    WeBack back = weBackService.selectWeBackById(look.getBackId());
-                    if (back == null) {
-                        log.error("未找到背景信息，look ID: {}", look.getId());
-                        continue;
-                    }
+                // 获取背景信息（包含提示词）
+                WeBack back = weBackService.selectWeBackById(look.getBackId());
+                if (back == null) {
+                    log.error("未找到背景信息，look ID: {}", look.getId());
+                    continue;
+                }
 
-                    // 1. 创建AI图片任务
-                    String taskId = WeshopUtils.createAiImageTask(look.getName(), look.getLookUrl());
-                    if (taskId != null) {
-                        log.info("创建AI图片任务成功，taskId: {}", taskId);
+                // 1. 创建AI图片任务
+                String taskId = WeshopUtils.createAiImageTask(look.getName(), look.getLookUrl());
+                if (taskId != null) {
+                    log.info("创建AI图片任务成功，taskId: {}", taskId);
 
-                        // 2. 执行AI图片任务
-                        //定义prompt,值为 back.getPromot()+ look.getRemark + look.getType()对应的提示词
-                        String executionId = WeshopUtils.executeAiImageTask(taskId, WeshopUtils.generatePromptByType(look.getType(), back.getPromot() + look.getRemark()));
-                        if (executionId != null) {
-                            log.info("执行AI图片任务成功，executionId: {}", executionId);
+                    // 2. 执行AI图片任务
+                    //定义prompt,值为 back.getPromot()+ look.getRemark + look.getType()对应的提示词
+                    String executionId = WeshopUtils.executeAiImageTask(taskId, WeshopUtils.generatePromptByType(look.getType(), back.getPromot() + look.getRemark()));
+                    if (executionId != null) {
+                        log.info("执行AI图片任务成功，executionId: {}", executionId);
 
-                            // 3. 轮询任务状态直到完成
-                            String status = "Pending";
-                            int retryCount = 0;
-                            int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
+                        // 3. 轮询任务状态直到完成
+                        String status = "Pending";
+                        int retryCount = 0;
+                        int maxRetries = 60; // 最多尝试60次，即300秒(5分钟)
 
-                            while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
-                                Thread.sleep(5000); // 每5秒查询一次
-                                retryCount++;
-                                log.info("第{}次轮询AI图片任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
+                        while (!"Success".equals(status) && !"Failed".equals(status) && retryCount < maxRetries) {
+                            Thread.sleep(5000); // 每5秒查询一次
+                            retryCount++;
+                            log.info("第{}次轮询AI图片任务状态，taskId: {}, executionId: {}", retryCount, taskId, executionId);
 
-                                WeshopUtils.AiImageTaskResult result = WeshopUtils.queryAiImageTask(taskId, executionId);
-                                if (result != null) {
-                                    status = result.getStatus();
-                                    log.info("AI图片任务状态: {}", status);
+                            WeshopUtils.AiImageTaskResult result = WeshopUtils.queryAiImageTask(taskId, executionId);
+                            if (result != null) {
+                                status = result.getStatus();
+                                log.info("AI图片任务状态: {}", status);
 
-                                    // 如果任务成功完成，保存AI图片
-                                    if ("Success".equals(status)) {
-                                        List<String> imageUrls = result.getImageUrls();
-                                        log.info("AI图片任务成功完成，共生成 {} 张图片", imageUrls.size());
+                                // 如果任务成功完成，保存AI图片
+                                if ("Success".equals(status)) {
+                                    List<String> imageUrls = result.getImageUrls();
+                                    log.info("AI图片任务成功完成，共生成 {} 张图片", imageUrls.size());
 
-                                        // 为每张图片创建WeAiPicture记录
-                                        for (String imageUrl : imageUrls) {
-                                            WeAiPicture aiPicture = new WeAiPicture();
-                                            aiPicture.setName(look.getName());
-                                            aiPicture.setType(look.getType());
-                                            aiPicture.setLookId(look.getId());
-                                            aiPicture.setLookUrl(look.getLookUrl());
-                                            aiPicture.setTaskId(taskId);
-                                            aiPicture.setExecuteId(executionId);
-                                            aiPicture.setAiUrl(imageUrl);
-                                            weAiPictureService.insertWeAiPicture(aiPicture);
-                                        }
-                                        log.info("AI图片记录保存完成");
-                                    } else if ("Failed".equals(status)) {
-                                        log.info("AI图片任务执行失败，错误信息: {}", result.getError());
-
-                                        // 保存错误信息
+                                    // 为每张图片创建WeAiPicture记录
+                                    for (String imageUrl : imageUrls) {
                                         WeAiPicture aiPicture = new WeAiPicture();
                                         aiPicture.setName(look.getName());
                                         aiPicture.setType(look.getType());
@@ -536,28 +601,43 @@ public class WeLookController extends BaseController
                                         aiPicture.setLookUrl(look.getLookUrl());
                                         aiPicture.setTaskId(taskId);
                                         aiPicture.setExecuteId(executionId);
-                                        aiPicture.setAiUrl("错误: " + result.getError());
+                                        aiPicture.setAiUrl(imageUrl);
                                         weAiPictureService.insertWeAiPicture(aiPicture);
                                     }
-                                } else {
-                                    log.warn("查询AI图片任务返回空结果");
-                                }
-                            }
+                                    log.info("AI图片记录保存完成");
+                                } else if ("Failed".equals(status)) {
+                                    log.info("AI图片任务执行失败，错误信息: {}", result.getError());
 
-                            if (retryCount >= maxRetries) {
-                                log.error("AI图片任务超时，未在规定时间内完成，taskId: {}", taskId);
+                                    // 保存错误信息
+                                    WeAiPicture aiPicture = new WeAiPicture();
+                                    aiPicture.setName(look.getName());
+                                    aiPicture.setType(look.getType());
+                                    aiPicture.setLookId(look.getId());
+                                    aiPicture.setLookUrl(look.getLookUrl());
+                                    aiPicture.setTaskId(taskId);
+                                    aiPicture.setExecuteId(executionId);
+                                    aiPicture.setAiUrl("错误: " + result.getError());
+                                    weAiPictureService.insertWeAiPicture(aiPicture);
+                                }
+                            } else {
+                                log.warn("查询AI图片任务返回空结果");
                             }
-                        } else {
-                            log.error("执行AI图片任务失败，taskId: {}", taskId);
+                        }
+
+                        if (retryCount >= maxRetries) {
+                            log.error("AI图片任务超时，未在规定时间内完成，taskId: {}", taskId);
                         }
                     } else {
-                        log.error("创建AI图片任务失败，look ID: {}", look.getId());
+                        log.error("执行AI图片任务失败，taskId: {}", taskId);
                     }
-                } catch (Exception e) {
-                    log.error("处理AI图片生成时出错，look ID: {}", look.getId(), e);
+                } else {
+                    log.error("创建AI图片任务失败，look ID: {}", look.getId());
                 }
+            } catch (Exception e) {
+                log.error("处理AI图片生成时出错，look ID: {}", look.getId(), e);
             }
-            log.info("批量生成AI图片处理完成");
+        }
+        log.info("批量生成AI图片处理完成");
         //}).start();
 
         return AjaxResult.success("AI图片生成任务已提交，正在后台处理");
@@ -575,8 +655,7 @@ public class WeLookController extends BaseController
         try {
             log.info("开始自动AI图片生成");
             R<SysFile> fileResult = remoteFileService.upload(lookFile);
-            if (StringUtils.isNull(fileResult) || StringUtils.isNull(fileResult.getData()))
-            {
+            if (StringUtils.isNull(fileResult) || StringUtils.isNull(fileResult.getData())) {
                 return error("文件服务异常，请联系管理员");
             }
 
@@ -629,7 +708,6 @@ public class WeLookController extends BaseController
             // 保存上传的文件到临时目录
             File tempBackgroundFile = File.createTempFile("background_", ".png");
             backgroundFile.transferTo(tempBackgroundFile);
-
 
 
             // 上传背景图片到Weshop
@@ -784,11 +862,11 @@ public class WeLookController extends BaseController
 
                 //如果look的lookUrl不为空，则调用以下方法
                 if (look.getLookUrl() != null && !look.getLookUrl().isEmpty() &&
-                    !"失败".equals(look.getLookUrl()) &&
-                    !"超时".equals(look.getLookUrl()) &&
-                    !"执行失败".equals(look.getLookUrl()) &&
-                    !"创建任务失败".equals(look.getLookUrl()) &&
-                    !"异常".equals(look.getLookUrl())) {
+                        !"失败".equals(look.getLookUrl()) &&
+                        !"超时".equals(look.getLookUrl()) &&
+                        !"执行失败".equals(look.getLookUrl()) &&
+                        !"创建任务失败".equals(look.getLookUrl()) &&
+                        !"异常".equals(look.getLookUrl())) {
 
                     // 类似generateAiImage方法的处理逻辑
                     try {
