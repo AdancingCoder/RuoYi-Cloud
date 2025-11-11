@@ -232,8 +232,9 @@ public class WeLookController extends BaseController {
         for (WeLook look : looks) {
             // 为每个look创建独立的异步任务，确保数据不会错乱
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                processLook(look);
-                processAiPicture(look);
+//                processLook(look);
+//                processAiPicture(look);
+                  processNanoImage(look);
             }, executorService);
             futures.add(future);
         }
@@ -253,7 +254,18 @@ public class WeLookController extends BaseController {
         return AjaxResult.success("任务已提交，正在后台处理");
     }
 
+    private void processNanoImage(WeLook look) {
 
+        String stylePrompt = "羽绒服的内搭是白色无帽圆领运动卫衣，下装是白色专业修身户外软壳加绒裤，鞋子是白色拼黑色户外高帮登山保暖靴，裤脚塞进鞋子里。";
+        JSONObject nanoImage = AlgorithmUtils.getNanoImage(look.getModelUrl(), look.getClothUrl(), look.getBackUrl(), stylePrompt);
+        if (nanoImage.getIntValue("code") == 200) {
+            String nanoPic = nanoImage.getJSONObject("data").getString("result_url");
+            look.setLookUrl(nanoPic);
+            System.out.println(nanoPic);
+            //weLookService.updateWeLook(look);
+        }
+
+    }
     /**
      * 生成looks
      */

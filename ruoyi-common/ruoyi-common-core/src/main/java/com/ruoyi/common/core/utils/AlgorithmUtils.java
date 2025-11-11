@@ -26,6 +26,8 @@ public class AlgorithmUtils {
     private static final String REPAIR_URL = BASE_URL + "/api/repair";
 
     private static final String CLOTH_INFO_ADD = "以下是服装描述的json结构，不要改变衣服细节/r/n";
+    // nano图片接口
+    private static final String NANO_URL = BASE_URL + "/api/get-nano-pic";
     /**
      * 获取服装信息
      * 通过服装图片URL获取详细的服装描述信息
@@ -139,5 +141,30 @@ public class AlgorithmUtils {
      */
     public static JSONObject repairImage(String image, String detailedImage, String taskName) {
         return repairImage(image, detailedImage, taskName, null, null, null);
+    }
+
+    public static JSONObject getNanoImage(String faceImageUrl,String lookImageUrl,String sceneImageUrl,String stylePrompt) {
+        try {
+            // 构造请求参数
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("face_image_url", faceImageUrl);
+            requestData.put("look_image_url", lookImageUrl);
+            requestData.put("scene_image_url", sceneImageUrl);
+            requestData.put("style_prompt", stylePrompt);
+            String jsonData = com.alibaba.fastjson2.JSON.toJSONString(requestData);
+
+            // 设置请求头
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+
+            // 发送POST请求进行图片放大处理
+            String response = HttpUtils.sendPost(NANO_URL, jsonData, headers);
+
+            // 将响应转换为JSONObject并返回
+            return com.alibaba.fastjson2.JSON.parseObject(response);
+        } catch (Exception e) {
+            log.error("getNanoImage处理失败 ", e);
+            return null;
+        }
     }
 }
