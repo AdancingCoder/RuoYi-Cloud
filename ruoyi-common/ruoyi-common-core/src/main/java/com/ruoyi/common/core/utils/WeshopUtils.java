@@ -1,22 +1,18 @@
 package com.ruoyi.common.core.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.DataOutputStream;
-import java.io.DataInputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.HttpURLConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Weshop工具类
@@ -46,7 +42,7 @@ public class WeshopUtils {
     /**
      * 获取Agent信息
      *
-     * @param agentName Agent名称
+     * @param agentName    Agent名称
      * @param agentVersion Agent版本
      * @return 包含locations和fashionModels数据的JSONObject
      */
@@ -137,7 +133,7 @@ public class WeshopUtils {
                 }
 
                 log.info("上传图片请求URL: {}", urlStr);
-                log.info("上传图片响应: {}", response.toString());
+                log.info("上传图片响应: {}", response);
 
                 // 解析响应
                 JSONObject jsonResponse = JSON.parseObject(response.toString());
@@ -162,7 +158,7 @@ public class WeshopUtils {
      * 创建时尚模型
      *
      * @param imageUrl 图片URL
-     * @param name 模型名称
+     * @param name     模型名称
      * @return 时尚模型ID
      */
     public static String createFashionModel(String imageUrl, String name) {
@@ -237,7 +233,7 @@ public class WeshopUtils {
      * 创建背景位置
      *
      * @param imageUrl 图片URL
-     * @param name 背景名称
+     * @param name     背景名称
      * @return 背景位置ID
      */
     public static String createLocation(String imageUrl, String name) {
@@ -321,7 +317,7 @@ public class WeshopUtils {
     /**
      * 创建任务
      *
-     * @param name 任务名称
+     * @param name     任务名称
      * @param clothUrl 服装图片URL
      * @return 任务ID
      */
@@ -362,7 +358,7 @@ public class WeshopUtils {
     /**
      * 创建AI图片任务
      *
-     * @param name 任务名称
+     * @param name    任务名称
      * @param lookUrl 外观图片URL
      * @return 任务ID
      */
@@ -403,9 +399,9 @@ public class WeshopUtils {
     /**
      * 执行任务
      *
-     * @param taskId 任务ID
+     * @param taskId    任务ID
      * @param modelWeId 模特ID
-     * @param backWeId 背景ID
+     * @param backWeId  背景ID
      * @return 执行ID
      */
     public static String executeTask(String taskId, String modelWeId, String backWeId) {
@@ -489,7 +485,7 @@ public class WeshopUtils {
     /**
      * 查询任务执行状态
      *
-     * @param taskId 任务ID
+     * @param taskId      任务ID
      * @param executionId 执行ID
      * @return 任务执行结果，包含状态和图片URL
      */
@@ -539,7 +535,7 @@ public class WeshopUtils {
     /**
      * 查询AI图片任务执行状态
      *
-     * @param taskId 任务ID
+     * @param taskId      任务ID
      * @param executionId 执行ID
      * @return AI图片任务执行结果，包含状态和图片URL列表
      */
@@ -603,15 +599,101 @@ public class WeshopUtils {
         }
     }
 
+
+
+
+    /**
+     * 创建AI扩图任务
+     *
+     * @param name    任务名称
+     * @param repairedImageUrl 外观图片URL
+     * @return 任务ID
+     */
+    public static String createAiEnlargeImageTask(String name,String repairedImageUrl) {
+        try {
+            // 构造请求参数
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("agentName", "expandimage");
+            requestData.put("agentVersion", "v1.0");
+
+            Map<String, Object> initParams = new HashMap<>();
+            initParams.put("taskName", name);
+            initParams.put("originalImage", repairedImageUrl);
+            requestData.put("initParams", initParams);
+
+            // 发送请求
+            String url = BASE_URL + "/agent/task/create";
+            String response = sendPostRequest(url, requestData);
+
+            log.info("创建AI图片扩图任务请求参数: {}", JSON.toJSONString(requestData));
+            log.info("创建AI图片扩图任务响应: {}", response);
+
+            // 解析响应
+            JSONObject jsonResponse = JSON.parseObject(response);
+            if (jsonResponse != null && jsonResponse.getBoolean("success")) {
+                JSONObject data = jsonResponse.getJSONObject("data");
+                return data.getString("taskId");
+            } else {
+                log.error("创建AI图片扩图任务失败: {}", jsonResponse != null ? jsonResponse.getString("message") : "响应为空");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("创建AI图片扩图任务异常", e);
+            return null;
+        }
+    }
+    /**
+     * 执行AI图片扩图
+     *
+     * @param taskId 任务ID
+     * @return 执行ID
+     */
+    public static String executeAiEnlargeImageTask(String taskId, int targetWidth,int targetHeight) {
+        try {
+            // 构造请求参数
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("taskId", taskId);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("targetWidth", targetWidth);
+            params.put("targetHeight", targetHeight);
+            params.put("batchCount", 1);//执行图片数量
+            requestData.put("params", params);
+
+            // 发送请求
+            String url = BASE_URL + "/agent/task/execute";
+            String response = sendPostRequest(url, requestData);
+
+            log.info("执行AI图片扩图任务请求参数: {}", JSON.toJSONString(requestData));
+            log.info("执行AI图片扩图任务响应: {}", response);
+
+            // 解析响应
+            JSONObject jsonResponse = JSON.parseObject(response);
+            if (jsonResponse != null && jsonResponse.getBoolean("success")) {
+                JSONObject data = jsonResponse.getJSONObject("data");
+                return data.getString("executionId");
+            } else {
+                log.error("执行AI图片扩图任务失败: {}", jsonResponse != null ? jsonResponse.getString("message") : "响应为空");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("执行AI图片扩图任务异常", e);
+            return null;
+        }
+    }
+
+
+
+
     /**
      * 根据look类型生成对应的prompt
      *
-     * @param type look类型
+     * @param type       look类型
      * @param basePrompt 基础prompt
      * @return 完整的prompt
      */
     public static String generatePromptByType(String type, String basePrompt) {
-        String prompt1 = "使用上面这张图片，根据文字描述，生成1张高分辨率图片，不要改变背景，如果背景中有不明线条需要去掉，不要包,不要帽子,不要狗，不要狗绳，不要犬，如果有手套需要和衣服颜色匹配；姿势不要插兜；羽绒服下面有一条短裙；裤子是竖条纹针织冬季连裤袜，保暖舒适，颜色是奶白色的，紧身版型贴合腿部，既保暖又能与靴子自然衔接，让造型更利落；鞋子是纯白色的长绒毛勃肯鞋，长毛绒颜色整体为白色，靴子的长毛绒类似动物的长毛；鞋子可以显得小巧一点，袜子是白色的针织长款堆堆袜，长度延伸至脚踝上方，整体造型在色彩上都以白色为主，相互配合，视觉统一。且紧身裤子、长袜与长靴的组合，可以彰显冬日氛围，全方位为腿部保暖，适合雪地等寒冷的户外环境。人物面带笑容，人物的手更像欧洲人的手，人物姿势更有型。将图片中人物的体型缩小，使其在画面中的占比更小，视觉上符合身高不超过180cm 的比例，同时保持人物与背景的相对位置和整体画面的协调性，就像把人物按比例缩小，让其看起来更小巧精致，与周围环境更适配。人体、衣服、环境更加和谐，尤其是人体、衣服、环境中的光线和阴影要契合。专业摄影，整体拍摄风格呈现高清细节质感，类似时尚杂志封面设计。";
+        String prompt1 = "模特站立于山地环境中，身体略微侧向一侧，目光望向远方。右手持登山杖，自然下垂并轻触地面，左手微微弯曲置于身前。肩部挺直，姿态稳健，展现出一种专注而沉静的神情。双脚稳立于不平的岩石地面上，重心分布均匀，整体呈现出准备前行或短暂休憩的状态。使用上面这张图片，根据文字描述，生成1张高分辨率图片，不要改变背景，如果背景中有不明线条需要去掉，不要帽子，不要包，如果有手套需要和衣服颜色匹配；姿势不要插兜。下装是白色专业修身户外软壳加绒裤，鞋子是白色拼黑色户外高帮登山保暖靴，裤脚塞进鞋子里。人物比较冷酷，人物的手更像亚洲人的手，人物姿势更有型。将图片中人物的体型缩小，使其在画面中的占比更小，视觉上符合身高175-180cm，，同时保持人物与背景的相对位置和整体画面的协调性，就像把人物按比例缩小，让其看起来更小巧精致，与周围环境更适配。人体、衣服、环境更加和谐，尤其是人体、衣服、环境中的光线和阴影要契合。专业摄影，整体拍摄风格呈现高清细节质感，类似时尚杂志封面设计。";
 
         String prompt2 = "使用上面这张图片，根据文字描述，生成1张高分辨率图片，不要改变背景，不要帽子，鞋子为高级感轻薄凉鞋，鞋子正常踩在地上,不要悬空，鞋子要完整，衣服有领儿的，不要改变领儿，不要改变衣服尺寸,不要改变衣服长短宽窄，因衣服无口袋，人物手部不要做插兜动作，人物姿势更灵动，人物的手更像亚洲人的手，人物面带笑容，人物为长发，人物腿为180模特的腿长。将图片中人物的体型缩小，使其在画面中的占比更小，视觉上符合身高不超过180cm 的比例，同时保持人物与背景的相对位置和整体画面的协调性，就像把人物按比例缩小，让其看起来更小巧精致，与周围环境更适配。人体、衣服、环境更加和谐，尤其是人体、衣服、环境中的光线和阴影要契合。专业摄影，整体拍摄风格呈现高清细节质感，类似时尚杂志封面设计。";
 
@@ -634,7 +716,7 @@ public class WeshopUtils {
     /**
      * 发送POST请求
      *
-     * @param url 请求URL
+     * @param url  请求URL
      * @param data 请求数据
      * @return 响应结果
      */
@@ -676,7 +758,7 @@ public class WeshopUtils {
      */
     public static class AiImageTaskResult {
         private String status;
-        private java.util.List<String> imageUrls = new java.util.ArrayList<>();
+        private final java.util.List<String> imageUrls = new java.util.ArrayList<>();
         private String error;
 
         public String getStatus() {
