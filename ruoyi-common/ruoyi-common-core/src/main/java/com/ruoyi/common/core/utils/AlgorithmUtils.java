@@ -17,7 +17,8 @@ public class AlgorithmUtils {
     private static final Logger log = LoggerFactory.getLogger(AlgorithmUtils.class);
 
     // 服务基础URL
-    private static final String BASE_URL = "http://192.168.0.152:8000";
+    //private static final String BASE_URL = "http://192.168.0.152:8000";
+    private static final String BASE_URL =  "http://localhost:8000";
     // 服装信息接口路径
     private static final String CLOTH_INFO_URL = BASE_URL + "/api/clothJson";
     // 图片放大接口路径
@@ -28,6 +29,10 @@ public class AlgorithmUtils {
     private static final String CLOTH_INFO_ADD = "以下是服装描述的json结构，不要改变衣服细节/r/n";
     // nano图片接口
     private static final String NANO_URL = BASE_URL + "/api/get-nano-pic";
+    // nano图片接口
+    private static final String NANO_LOOK_SWAP_FACE_URL = BASE_URL + "/api/get-nano-pic-look-swap-face";
+    // nano图片接口
+    private static final String FACE_SWAP_URL = BASE_URL + "/api/face-swap";
     /**
      * 获取服装信息
      * 通过服装图片URL获取详细的服装描述信息
@@ -159,6 +164,54 @@ public class AlgorithmUtils {
 
             // 发送POST请求进行图片放大处理
             String response = HttpUtils.sendPost(NANO_URL, jsonData, headers);
+
+            // 将响应转换为JSONObject并返回
+            return com.alibaba.fastjson2.JSON.parseObject(response);
+        } catch (Exception e) {
+            log.error("getNanoImage处理失败 ", e);
+            return null;
+        }
+    }
+
+    public static JSONObject getNanoImageLookSwapFace(String lookImageUrl,String sceneImageUrl,String stylePrompt) {
+        try {
+            // 构造请求参数
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("look_image_url", lookImageUrl);
+            requestData.put("scene_image_url", sceneImageUrl);
+            requestData.put("style_prompt", stylePrompt);
+            String jsonData = com.alibaba.fastjson2.JSON.toJSONString(requestData);
+
+            // 设置请求头
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+
+            // 发送POST请求进行图片放大处理
+            String response = HttpUtils.sendPost(NANO_LOOK_SWAP_FACE_URL, jsonData, headers);
+
+            // 将响应转换为JSONObject并返回
+            return com.alibaba.fastjson2.JSON.parseObject(response);
+        } catch (Exception e) {
+            log.error("getNanoImage处理失败 ", e);
+            return null;
+        }
+    }
+
+    public static JSONObject faceSwap(String faceImageUrl,String lookImageUrl,String stylePrompt) {
+        try {
+            // 构造请求参数
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("face_image_url", faceImageUrl);
+            requestData.put("look_image_url", lookImageUrl);
+            requestData.put("prompt_text", stylePrompt);
+            String jsonData = com.alibaba.fastjson2.JSON.toJSONString(requestData);
+
+            // 设置请求头
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+
+            // 发送POST请求进行图片放大处理
+            String response = HttpUtils.sendPost(FACE_SWAP_URL, jsonData, headers);
 
             // 将响应转换为JSONObject并返回
             return com.alibaba.fastjson2.JSON.parseObject(response);

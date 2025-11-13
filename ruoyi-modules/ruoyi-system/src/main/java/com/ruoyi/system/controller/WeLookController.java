@@ -232,9 +232,11 @@ public class WeLookController extends BaseController {
         for (WeLook look : looks) {
             // 为每个look创建独立的异步任务，确保数据不会错乱
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-//                processLook(look);
-//                processAiPicture(look);
-                  processNanoImage(look);
+                processLook(look);
+                //processAiPicture(look);
+//                  processNanoImage(look);
+//                processFaceSwapImage(look);
+                processNanoImageLookSwapFace(look);
             }, executorService);
             futures.add(future);
         }
@@ -256,13 +258,37 @@ public class WeLookController extends BaseController {
 
     private void processNanoImage(WeLook look) {
 
-        String stylePrompt = "羽绒服的内搭是白色无帽圆领运动卫衣，下装是白色专业修身户外软壳加绒裤，鞋子是白色拼黑色户外高帮登山保暖靴，裤脚塞进鞋子里。";
+        String stylePrompt = "蓬松长款羽绒服内搭白色上衣，搭配黑色修身喇叭裤，黑色皮鞋，戴黑色带BOSIDENG字母针的织帽，脖子上挂一个深灰色耳麦。";
         JSONObject nanoImage = AlgorithmUtils.getNanoImage(look.getModelUrl(), look.getClothUrl(), look.getBackUrl(), stylePrompt);
         if (nanoImage.getIntValue("code") == 200) {
             String nanoPic = nanoImage.getJSONObject("data").getString("result_url");
             look.setLookUrl(nanoPic);
             System.out.println(nanoPic);
             //weLookService.updateWeLook(look);
+        }
+
+    }
+
+    private void processNanoImageLookSwapFace(WeLook look) {
+
+        String stylePrompt = "蓬松长款羽绒服内搭白色上衣，搭配黑色修身喇叭裤，黑色皮鞋，戴黑色带BOSIDENG字母针的织帽，脖子上挂一个深灰色耳麦。";
+        JSONObject nanoImage = AlgorithmUtils.getNanoImageLookSwapFace(look.getLookUrl(), look.getBackUrl(), stylePrompt);
+        if (nanoImage.getIntValue("code") == 200) {
+            String nanoPic = nanoImage.getJSONObject("data").getString("result_url");
+            System.out.println(nanoPic);
+            //weLookService.updateWeLook(look);
+        }
+
+    }
+
+
+    private void processFaceSwapImage(WeLook look) {
+        //String stylePrompt = "你是一位专业的AI图像合成专家。请使用第一张图片中的人脸特征（五官、表情、肤色、光照方向）替换第二张图片中人物的脸部。保留第二张图片的发型、姿势、服装和背景。保证融合自然、肤色匹配、边缘平滑，避免双脸或失真。输出1张高分辨率、逼真的照片版本。";
+        String stylePrompt = "执行严格的人脸替换任务，按以下步骤1:1执行，不得偏离：从第一张图片中提取完整人脸，保留面部特征、表情、肤色及五官细节并忽略其他背景；精准定位第二张图片中人物的头部位置，匹配原人物头部角度、大小与姿态；将提取的人脸完美替换至目标头部位置，确保人脸比例与目标图人物身体协调不拉伸压缩，按目标图光线方向和明暗度调整人脸光影，消除人脸与头发、脖子、衣物的拼接痕迹实现自然过渡，保留目标图整体色调、滤镜及清晰度且不改变背景和人物身体其他部分；最终输出高清无模糊、无额外添加元素，仅完成换脸操作的图片。";
+        JSONObject nanoImage = AlgorithmUtils.faceSwap(look.getModelUrl(), look.getClothUrl(), stylePrompt);
+        if (nanoImage.getIntValue("code") == 200) {
+            String nanoPic = nanoImage.getJSONObject("data").getString("result_url");
+            System.out.println(nanoPic);
         }
 
     }
